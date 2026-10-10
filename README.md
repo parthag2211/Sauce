@@ -4,8 +4,11 @@ Sauce is a voice-powered applicant marketplace. Hiring managers provide organiza
 context, a job description, and a spoken vision for the ideal hire. Applicants provide
 a profile and answer up to three screening questions by voice.
 
-This is the initial **architecture and team handoff** commit. There is no working hiring
-backend, frontend, deployed Sauce MCP URL, or scoring implementation in this repository yet.
+This repository contains the **architecture, team handoff, and visual product walkthrough**.
+Explore the [live Sauce vision](https://sauce-vision-production.up.railway.app), or see
+[landing page development and deployment instructions](landing/README.md).
+There is no working hiring backend, application-submission frontend, deployed Sauce MCP
+URL, or scoring implementation in this repository yet. The landing page uses illustrative data.
 Sagar owns final data architecture and scoring decisions; proposed contracts are identified
 as such so the teams can work toward one implementation without treating guesses as facts.
 
