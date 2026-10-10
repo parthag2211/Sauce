@@ -1,5 +1,7 @@
 # Sauce scoring model — three manager-weighted components
 
+Current domain: Organization, Person and Opportunity. The executable rubric lives in an Opportunity's immutable **RolePolicyVersion**; earlier `job_version` / `rubric_version` names are legacy illustrations. The [nine-step workflow](WORKFLOW_AND_INTEGRATIONS.md) adds reviewed historical patterns, employee/manager context, a 7–8-line hypothesis and versioned policy approval. These propose criteria; they do not add a fourth score or automatically train a model. Prioritized review is now part of the requested journey, with exact ordering/tie rules still open; compare only the same policy and show unknowns separately. Shortlisted/offered/accepted/hired history is not ground-truth job performance. Applicant inquiries never become additional screening evidence.
+
 ## Confirmed configuration
 
 Sagar defines three scoring components:

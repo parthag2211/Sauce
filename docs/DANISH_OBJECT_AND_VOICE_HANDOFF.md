@@ -2,47 +2,45 @@
 
 For Sagar and Danish. Status: proposed integration design, not implemented endpoints or trained models. This simplifies the product view of the existing architecture without discarding versioning, ownership, or evidence. Sagar owns final fields, rubric anchors, and scoring weights. Danish's development platform is Replit; his framework and voice provider are not yet specified.
 
+Start with the current [Organization, Person, Opportunity architecture](../backend-architecture/OBJECT_ARCHITECTURE.md), [nine-step workflow](../backend-architecture/WORKFLOW_AND_INTEGRATIONS.md), and [four question purposes/file types/ElevenLabs adapter](../backend-architecture/QUESTIONS_AND_FILES.md). These supersede the earlier two-object view. ElevenLabs is an available integration candidate; provider configuration/account access are not verified. This document remains the voice adapter and training-lineage handoff.
+
 ## The pitch
 
 Sauce connects two people with three kinds of evidence. A hiring manager describes the organization, the work, and the person they need. An applicant shares their experience, the work they want, and answers up to three questions by voice. Sauce compares the written profiles, assesses what the applicant said, and can measure explicitly defined aspects of their vocal delivery. Each result points to the original evidence. The manager decides how much each supported component matters and reviews the result.
 
-The product has two main objects: **Applicant** and **HiringManager**. An **Application** connects a version of an applicant's profile to a particular job brief. Files, transcripts, and processing runs are supporting records, not additional kinds of users.
+The product has three main objects: **Organization**, **Person**, and **Opportunity**. Applicant and HiringManager are Person role profiles. An Application connects a Person's submitted applicant-profile version to an Opportunity/version. Files, transcripts, stage events, hypothesis/policy versions and processing runs are supporting records.
 
 The proposed third path is **observable vocal delivery**, not an emotion or sentiment classifier. Do not infer applicants' inner emotions, personality, honesty, or suitability from vocal affect. Measures such as pace and pause timing describe a recording; any interpretation for hiring needs explicit job-related criteria and human review. If those criteria are absent, return observations with no score. Neither more pauses nor faster speech is inherently better.
 
-## Two main objects
+## Three primary objects and role entry points
 
 ```text
-HiringManager                          Applicant
-  id, authenticated owner               id, authenticated owner
-  organization scope                    current profile version
-  jobBriefs[]                           profile
-    jobId, version                        credentialsMd -> original file
-    organizationMd -> original file       proposalMd -> original file
-    jobDescriptionMd -> original file     contacts -> private structured fields
-    visionVoice -> audio + transcript     references -> private structured fields
-    confirmed role requirements           extracted, applicant-reviewed profile
-    approved questions[1..3]            applications[] -> application IDs
-    rubric -> anchors + three weights
-           \                             /
-            Application / submission snapshot
-              applicantId + profileVersionId
-              hiringManagerId + jobId + jobVersionId
-              approved questionSetVersionId
-              selected voice answers[1..3]
-              evaluations[] -> immutable run IDs
+Organization
+  context Markdown versions, teams, memberships, opportunities
+Person
+  identity and authorized organization relationships
+  Applicant profile: credentials, proposal, private contacts/references
+  HiringManager profile: memberships and opportunity assignments
+Opportunity
+  company/team/role/seniority/current requirements
+  pinned organization context + JD Markdown + manager voice vision
+  historical pool/stage events and reviewed pattern proposals
+  manager/employee discovery, applicant screening and applicant inquiries
+  7–8-line hypothesis and immutable manager-approved role policy
+  Application snapshots: Person + profile + opportunity/policy versions
+    selected voice answers[1..3], evaluations and human stage events
 ```
 
-These are API/domain views, not instructions to put a growing graph into two database rows. Their child records may be normalized in storage. One authenticated person can own both roles; a frontend role toggle does not grant new permissions.
+These are API/domain views; their child records may be normalized in storage. One Person can hold both roles; a frontend role toggle does not grant permissions. Historical imported people stay organization-scoped and unclaimed until a verified linking/sharing process is agreed.
 
-| Main object | Three intake sections | What belongs underneath |
+| Role entry point | Three intake sections | Where the records belong |
 | --- | --- | --- |
-| HiringManager | Organization Markdown, JD Markdown, manager voice vision | One or more job briefs, confirmed requirements, approved questions, per-job scoring rubric. Organization Markdown can be reused by reference if that policy is approved. |
-| Applicant | Credentials, work proposal, contacts and references | Original credential/proposal Markdown, reviewed profile, private contact/reference details, links to applications. Voice screening answers belong to a specific application and question. |
+| Person.HiringManager | Organization Markdown, JD Markdown, manager voice vision | Organization owns context versions; Opportunity owns JD/vision, requirements, question sets and approved role policy. |
+| Person.Applicant | Credentials, work proposal, contacts and references | Person owns profile versions and private contacts; each Application owns selected screening answers and outcome history for its Opportunity. |
 
 Sagar's latest request calls for applicant Markdown to be cross-referenced with manager Markdown. Proposed first intake: `credentials.md` for academic/work history and `proposal.md` for desired work; keep contacts and reference contacts structured and outside evaluator inputs. The exact applicant upload/form UX is still to be agreed. Markdown originals remain authoritative source material; extracted fields are derived and reviewed. A listed reference is not a verified endorsement.
 
-An application is necessary even with only two main objects: the same person can apply to two jobs, with different questions, answers, rubrics, and results. Never store one global applicant fit score. A result belongs to **an applicant submission × a job version × a rubric version**.
+An application remains necessary: the same Person can apply to different Opportunities, with different questions, answers, policies and results. Never store one global Person fit score. A result belongs to **an applicant submission × an opportunity version × a role-policy version**. Earlier voice v1 fixtures use `job_version_id`; agree a versioned adapter to canonical `opportunity_version_id` before integration.
 
 ## Three independent scoring paths
 
@@ -159,7 +157,7 @@ Acceptance checks: recording bytes survive an app restart; a foreign artifact is
 
 ### Copy into Danish's Replit Agent
 
-> Build the Sauce voice evidence service using the attached handoff and JSON fixtures. Keep Applicant and HiringManager as the two main domain objects, joined through versioned job applications. Preserve original Markdown, audio, ASR and reviewed transcripts in private durable storage with database metadata. Implement the synthetic upload → transcription → review → submission slice first. Keep the three component keys `composite_profile`, `voice_transcript`, and `voice_behaviors`; return null scores until approved anchors exist. Audio processing produces only defined observable delivery and recording-quality evidence, with no emotion, sentiment or personality inference for hiring. Make processing asynchronous, authenticated, idempotent and source-versioned. Keep the transcript-content task separate from ASR/audio extraction. Do not claim model training, score quality, a live MCP endpoint or complete iMessage integration until each is implemented and verified. Share your framework/provider choices and a working request/result pair before expanding the contract.
+> Build the Sauce voice evidence service using the current Organization, Person, Opportunity architecture and nine-step workflow. Applicant and HiringManager are Person profiles/roles. Opportunity owns discovery/context questions, max-three voice screening questions, applicant inquiries, an evidence-backed 7–8-line hypothesis and an approved versioned role policy. Preserve historical shortlisted/offered/accepted/hired events separately. Preserve original Markdown/resumes, audio, ASR and reviewed transcripts in private durable storage with database metadata. Implement a synthetic upload → transcription → review → submission slice first, with an ElevenLabs adapter if selected and configured. Keep `composite_profile`, `voice_transcript`, `voice_behaviors`; return null scores until approved anchors exist. Audio produces defined observable delivery/quality evidence, with no emotion or personality inference for hiring. Make processing authenticated, asynchronous, idempotent and source-versioned; keep transcript assessment separate from ASR/audio extraction. Historical outcomes draft proposals, never automatically retrain or change policy. Share provider/framework choices and a working request/result pair before binding clients. Do not claim unimplemented model training, MCP or iMessage functionality.
 
 ## Decisions to make together
 

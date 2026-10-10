@@ -1,6 +1,8 @@
-# Proposed Sauce data model
+# Sauce normalized storage appendix
 
-Product/API view: **Applicant** and **HiringManager** are the two main objects; jobs, applications, source artifacts and model runs are supporting records. See the [simplified object architecture and Danish handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md). The normalized entities below implement those views rather than introducing more user personas. The latest proposed applicant source format is credential and work-proposal Markdown, with contacts/references kept separately structured.
+The authoritative product/domain view is [Organization, Person and Opportunity](OBJECT_ARCHITECTURE.md), with Applicant/HiringManager profiles under Person. Read that object model, [the nine-step workflow](WORKFLOW_AND_INTEGRATIONS.md), and [questions/file types](QUESTIONS_AND_FILES.md) first. This earlier normalized proposal remains an implementation appendix: `USER` maps to Person/auth identity, `JOB` to Opportunity, and `RUBRIC_VERSION` to RolePolicyVersion. It is not a separate two-object system. New contracts must use the canonical names through an agreed versioned adapter.
+
+Historical imports, outcome events, cohort/pattern proposals, employee interviews, applicant inquiries and hypothesis/policy approval are defined in the current object model. The direct-submission voice requirements below apply to new applications, not imported historical snapshots. Applicant credentials/proposal may originate in Markdown or supported resumes; contacts/references remain separately structured.
 
 All entities and constraints below are proposals for review. IDs are opaque UUIDs;
 timestamps are UTC. PostgreSQL is a proposed starting point, reusing the team's existing

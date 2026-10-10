@@ -1,0 +1,132 @@
+{
+  "schema_version": "sauce.domain.design.v2",
+  "fixture_only": true,
+  "organization": {
+    "id": "org-demo",
+    "name": "Example Operations",
+    "context_version_id": "org-context-demo-v1",
+    "organization_md_artifact_id": "artifact-org-md",
+    "teams": [{"id": "team-demo", "name": "Operations"}]
+  },
+  "people": [
+    {
+      "id": "person-manager-demo",
+      "ownership_state": "self_owned_demo",
+      "role_profiles": {"hiring_manager": {"membership_id": "membership-demo"}},
+      "memberships": [{"id": "membership-demo", "organization_id": "org-demo", "role": "hiring_manager"}]
+    },
+    {
+      "id": "person-applicant-demo",
+      "ownership_state": "self_owned_demo",
+      "role_profiles": {"applicant": {
+        "profile_version_id": "profile-demo-v1",
+        "credentials_md_artifact_id": "artifact-credentials-md",
+        "proposal_md_artifact_id": "artifact-proposal-md",
+        "private_contact_bundle_id": "contacts-demo"
+      }}
+    },
+    {
+      "id": "person-historical-demo",
+      "ownership_state": "imported_unclaimed",
+      "controlling_organization_id": "org-demo",
+      "historical_profile_snapshot_id": "historical-profile-demo",
+      "source_resume_artifact_id": "artifact-historical-resume"
+    }
+  ],
+  "opportunities": [
+    {"id": "opportunity-prior-demo", "organization_id": "org-demo", "team_id": "team-demo", "version_id": "opportunity-prior-demo-v1", "cycle_id": "cycle-prior-demo", "role": "Operations lead", "state": "closed"},
+    {
+      "id": "opportunity-current-demo",
+      "organization_id": "org-demo",
+      "team_id": "team-demo",
+      "manager_person_ids": ["person-manager-demo"],
+      "version_id": "opportunity-current-demo-v1",
+      "cycle_id": "cycle-current-demo",
+      "role": "Operations lead",
+      "seniority": null,
+      "requirements_review_state": "draft",
+      "organization_context_version_id": "org-context-demo-v1",
+      "jd_md_artifact_id": "artifact-jd-md",
+      "manager_vision_audio_artifact_id": "artifact-manager-voice",
+      "manager_vision_reviewed_transcript_id": "transcript-manager-v1",
+      "role_policy_version_id": null,
+      "state": "hypothesis_review"
+    }
+  ],
+  "questions": [
+    {"id": "q-manager-demo", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "manager_discovery", "respondent_role": "hiring_manager", "text": "What must this person deliver in the first 90 days?", "allowed_response_modes": ["voice", "text"], "status": "draft"},
+    {"id": "q-employee-demo", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "employee_context", "respondent_role": "employee_participant", "text": "Describe a recent work problem and the abilities you used.", "allowed_response_modes": ["voice", "text"], "status": "draft"},
+    {"id": "q-screen-1", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "applicant_screening", "ordinal": 1, "respondent_role": "applicant", "text": "Describe an operation you improved and your contribution.", "allowed_response_modes": ["voice"], "status": "draft"},
+    {"id": "q-screen-2", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "applicant_screening", "ordinal": 2, "respondent_role": "applicant", "text": "How would you approach the first-month problem in this role?", "allowed_response_modes": ["voice"], "status": "draft"},
+    {"id": "q-screen-3", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "applicant_screening", "ordinal": 3, "respondent_role": "applicant", "text": "Which work do you want to own and where would you need support?", "allowed_response_modes": ["voice"], "status": "draft"},
+    {"id": "q-inquiry-demo", "opportunity_version_id": "opportunity-current-demo-v1", "purpose": "applicant_inquiry", "respondent_role": "authorized_employer", "author_person_id": "person-applicant-demo", "text": "How will success be assessed after 90 days?", "allowed_response_modes": ["voice", "text"], "visibility": "private_application_thread", "affects_applicant_score": false, "status": "draft_example"}
+  ],
+  "historical_applications": [{
+    "id": "application-historical-demo",
+    "person_id": "person-historical-demo",
+    "organization_id": "org-demo",
+    "opportunity_id": "opportunity-prior-demo",
+    "opportunity_version_id": "opportunity-prior-demo-v1",
+    "profile_version_id": "historical-profile-demo",
+    "source": "historical_import",
+    "import_batch_id": "import-demo",
+    "screening_question_set_version_id": null,
+    "selected_answer_take_ids": []
+  }],
+  "outcome_events": [
+    {"id": "event-shortlisted-demo", "application_id": "application-historical-demo", "organization_id": "org-demo", "opportunity_id": "opportunity-prior-demo", "cycle_id": "cycle-prior-demo", "event_type": "shortlisted", "occurred_at": null, "recorded_at": "2026-10-10T00:00:00Z", "source_artifact_id": "artifact-outcomes-csv", "source_row": 2, "source_label": "shortlisted", "stage_mapping_version": "mapping-demo-v1"},
+    {"id": "event-offered-demo", "application_id": "application-historical-demo", "organization_id": "org-demo", "opportunity_id": "opportunity-prior-demo", "cycle_id": "cycle-prior-demo", "event_type": "offered", "occurred_at": null, "recorded_at": "2026-10-10T00:00:00Z", "source_artifact_id": "artifact-outcomes-csv", "source_row": 3, "source_label": "offered", "stage_mapping_version": "mapping-demo-v1"},
+    {"id": "event-accepted-demo", "application_id": "application-historical-demo", "organization_id": "org-demo", "opportunity_id": "opportunity-prior-demo", "cycle_id": "cycle-prior-demo", "event_type": "accepted", "occurred_at": null, "recorded_at": "2026-10-10T00:00:00Z", "source_artifact_id": "artifact-outcomes-csv", "source_row": 4, "source_label": "accepted", "stage_mapping_version": "mapping-demo-v1"}
+  ],
+  "historical_interpretation": {
+    "hired_event_available": false,
+    "employee_performance_evidence_available": false,
+    "pattern_status": "insufficient_evidence",
+    "note": "One imported record with no hired event does not establish a success pattern. Accepted does not imply hired."
+  },
+  "hiring_hypothesis": {
+    "status": "draft_unconfigured",
+    "lines": [
+      "Role: Operations lead for the Operations team; seniority and current outcomes need confirmation.",
+      "Requirements: Review the JD and manager vision before confirming entry abilities.",
+      "History: One historical application has documented shortlisted, offered and accepted events.",
+      "Uncertainty: No hired event, event occurrence times or employee performance evidence is available.",
+      "Work context: Manager and employee discovery interviews have not been completed.",
+      "Assessment: Three example voice-screening questions remain drafts without approved anchors.",
+      "Policy: All three weights, missingness and ordering rules require manager review.",
+      "Next review: Record documented outcomes and propose a reviewed next-cycle revision."
+    ],
+    "line_evidence_refs": {
+      "1": ["opportunity-current-demo-v1"],
+      "2": ["artifact-jd-md", "artifact-manager-voice"],
+      "3": ["event-shortlisted-demo", "event-offered-demo", "event-accepted-demo"],
+      "4": ["application-historical-demo"],
+      "5": [],
+      "6": ["q-screen-1", "q-screen-2", "q-screen-3"],
+      "7": [],
+      "8": []
+    },
+    "uncertainties": {
+      "1": ["Seniority and current outcomes are not confirmed."],
+      "2": ["JD and voice interpretation are not manager-approved."],
+      "3": ["Only one historical application is present; no comparative pattern is supported."],
+      "4": ["Hired event, occurrence times and performance evidence are unavailable."],
+      "5": ["Context interviews are not completed."],
+      "6": ["Screening anchors and question approval are absent."],
+      "7": ["Weights, missingness and exact prioritization rules are not approved."],
+      "8": ["The specific next-review trigger is not approved."]
+    },
+    "structured_policy_approved": false
+  },
+  "evaluation": {
+    "status": "not_configured",
+    "role_policy_version_id": null,
+    "components": {
+      "composite_profile": {"score": null},
+      "voice_transcript": {"score": null},
+      "voice_behaviors": {"score": null}
+    },
+    "overall_score": null,
+    "prioritized_list_snapshot_id": null
+  }
+}

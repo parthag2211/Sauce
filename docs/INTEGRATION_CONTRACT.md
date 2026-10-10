@@ -4,6 +4,14 @@ Status: proposed service contract for frontend and backend review. Exact HTTP ro
 MCP tool schemas and production storage bindings are not implemented. Use command names
 below for mocks; agree on wire routes before binding a real client.
 
+## Current domain and extended workflow
+
+The authoritative objects are [Organization, Person and Opportunity](../backend-architecture/OBJECT_ARCHITECTURE.md), with Applicant/HiringManager profiles under Person. Opportunity owns four [question purposes and file-processing contracts](../backend-architecture/QUESTIONS_AND_FILES.md), historical stage events, a 7–8-line hypothesis and an approved RolePolicyVersion. The [nine-step frontend journey](../backend-architecture/WORKFLOW_AND_INTEGRATIONS.md) is the full workflow; the original commands below illustrate its direct-intake slice.
+
+Canonical new IDs are `person_id`, `opportunity_id`, `opportunity_version_id`, `role_policy_version_id`. Existing JSON examples and voice v1 fixtures use legacy job/rubric field names. Agree a v2 wire contract and explicit adapter; do not bind both to independent stores or accept conflicting aliases. Imported historical applicants are scoped unclaimed Person records, not consented direct voice submissions.
+
+Additional proposed domain commands: `preview_historical_import`, `apply_historical_import`, `get_stage_candidate_sets`, `propose_historical_patterns`, `create_context_interview`, `record_context_response`, `ask_employer`, `reply_to_inquiry`, `draft_hiring_hypothesis`, `approve_role_policy`, `get_prioritized_review`, `record_outcome_event`, `propose_next_cycle_revision`. Each uses authenticated scope, source versions/digest, expected revision and idempotency where relevant. Approving policy checks criteria/anchors/questions/weights; a prose hypothesis alone is insufficient. Outcome recording never implicitly approves new policy, sends messages or trains models. These names are proposals, not deployed routes.
+
 ## Resource boundaries
 
 - Identity: authenticated principal plus organization membership or isolated demo workspace.

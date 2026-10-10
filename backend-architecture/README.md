@@ -11,6 +11,8 @@ the repository contained only a README (commit
 
 ## Confirmed requirements
 
+Primary objects are **Organization, Person and Opportunity**; Applicant and HiringManager are Person role profiles. The authoritative [object architecture](OBJECT_ARCHITECTURE.md) maps these to the frontend's [nine-step hiring cycle](WORKFLOW_AND_INTEGRATIONS.md). Opportunity contains [both directions of applicant questions plus discovery/context questions](QUESTIONS_AND_FILES.md). Historical shortlisted/offered/accepted/hired events stay distinct. ElevenLabs is an available transcription integration candidate, with capabilities documented in the file contract; no provider connection is claimed.
+
 Hiring manager intake has three sources: organization `.md` upload, JD `.md` upload,
 and a recorded voice description of the ideal hire. Sauce generates at most three
 screening questions from that brief for manager review. Every screening answer is voice
@@ -30,7 +32,7 @@ applicant UI, deployed backend, MCP endpoint, iOS build, or TestFlight distribut
 
 ## Read in order
 
-Start with [the two-object explanation and Danish's Replit handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md) for the product view, voice-worker fixtures and future training tracks.
+Start with [Organization, Person and Opportunity](OBJECT_ARCHITECTURE.md), [workflow/integrations](WORKFLOW_AND_INTEGRATIONS.md), [questions/files](QUESTIONS_AND_FILES.md), then [Danish's Replit handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md) for voice-worker fixtures and future training tracks.
 
 1. [Data model](DATA_MODEL.md): entities, ownership, versioning, states and invariants.
 2. [Scoring model](SCORING_MODEL.md): evidence-first evaluation and configurable rubric.

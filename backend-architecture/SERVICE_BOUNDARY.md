@@ -1,10 +1,12 @@
 # Sauce backend boundary and transfer plan
 
+Current domain modules are **Organization, Person and Opportunity**, with role profiles and supporting applications/evidence/policy/outcome records. See [the object model](OBJECT_ARCHITECTURE.md) and [nine-step workflow](WORKFLOW_AND_INTEGRATIONS.md). Earlier job/rubric command names below are illustrative v1 aliases for Opportunity/RolePolicyVersion; agree a versioned adapter before integration. Add historical import preview/apply, context interviews, applicant inquiries, hypothesis/policy review, prioritized-list snapshots and outcome/next-cycle proposal services. Provider adapters include a proposed ElevenLabs transcription adapter; no runtime port or provider connection exists yet.
+
 Proposed structure in the Sauce repository:
 
 ```text
 backend/
-  domain/           identities, jobs, profiles, applications, evidence, evaluations
+  domain/           organizations, people, opportunities, applications, evidence, policies, outcomes
   services/         authorized commands and queries; transaction boundaries
   ports/            storage, transcription, extraction and evaluation interfaces
   adapters/http/    authenticated HTTP transport

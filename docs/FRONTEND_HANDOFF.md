@@ -8,6 +8,12 @@ This document specifies desired behavior; no screens or API routes are implement
 The frontend framework and web/native scope are open choices. Native iMessage changes
 belong in amber-imessage; a web frontend can live here. Share domain contracts across both.
 
+## Current frontend journey and object architecture
+
+Use **Organization, Person and Opportunity**, with Applicant/HiringManager profiles under Person. The [authoritative nine-step journey](../backend-architecture/WORKFLOW_AND_INTEGRATIONS.md) now includes historical resume/outcome import, separate shortlisted/offered/accepted/hired sets, proposed patterns, employee/manager interviews, a 7–8-line hypothesis, manager-approved role policy, prioritized new-applicant review and next-cycle outcomes. The direct-intake flow below is one slice within that journey, not its full scope.
+
+Opportunity owns four [question purposes](../backend-architecture/QUESTIONS_AND_FILES.md): manager discovery, employee context, max-three voice applicant screening, and applicant-to-employer inquiries. Show inquiries separately, with private voice/text replies and no applicant scoring effect. Include import previews/mapping conflicts, hypothesis evidence/gaps, explicit policy version approval and unknown/noncomparable results in the prioritized-list UX. Supported/proposed file types and parser/voice states are in the same question/file contract. Do not present historical advancement as proven performance or silently change policy on new outcomes.
+
 ## Hiring manager flow
 
 1. Enter the manager persona in an explicitly isolated demo workspace.

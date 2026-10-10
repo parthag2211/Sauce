@@ -1,6 +1,7 @@
 # Sauce
 
-Sauce is a voice-powered applicant marketplace. Hiring managers provide organizational
+Sauce is a voice-powered applicant marketplace built around **Organization, Person, and Opportunity**.
+Applicant and HiringManager are profiles/roles of Person. Hiring managers provide organizational
 context, a job description, and a spoken vision for the ideal hire. Applicants provide
 a profile and answer up to three screening questions by voice.
 
@@ -14,7 +15,10 @@ as such so the teams can work toward one implementation without treating guesses
 
 ## Team starting points
 
-- **Danish / Replit integration:** [Two-object architecture, three evaluators, voice storage and training handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
+- **Start here:** [Organization, Person and Opportunity architecture](backend-architecture/OBJECT_ARCHITECTURE.md).
+- **Frontend journey / backend workflow:** [Nine-step cycle, hypothesis and integration plan](backend-architecture/WORKFLOW_AND_INTEGRATIONS.md).
+- **Both sides' questions and file types:** [Question purposes, imports and voice processing](backend-architecture/QUESTIONS_AND_FILES.md).
+- **Danish / Replit integration:** [Object architecture, three evaluators, voice storage and training handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
 - **Frontend team:** [Frontend handoff](docs/FRONTEND_HANDOFF.md).
 - **Backend and voice-data counterpart:** [Backend and voice handoff](docs/BACKEND_VOICE_HANDOFF.md).
 - **Both teams:** [Shared integration contract](docs/INTEGRATION_CONTRACT.md).

@@ -17,3 +17,9 @@ they are not a claim that an application may be submitted without contact inform
 fixtures described in [Danish's handoff](../../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
 They are not covered by `sauce.schema.json`; a production event schema remains to be agreed.
 Their hashes, transcript and measurements are synthetic, not outputs of a real audio run.
+
+The current primary objects are [Organization, Person and Opportunity](../OBJECT_ARCHITECTURE.md).
+`opportunity-cycle-v2.json` is a separate synthetic domain discussion fixture covering role profiles,
+four question purposes, historical stage events and an unapproved eight-line hypothesis.
+It is not covered by the earlier v1 schema, nor is it a deployed v2 API contract. Earlier job/rubric
+field names require a versioned mapping to Opportunity/RolePolicyVersion before integration.

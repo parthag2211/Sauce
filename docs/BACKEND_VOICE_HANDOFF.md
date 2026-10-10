@@ -1,5 +1,7 @@
 # Sauce backend and voice-data handoff
 
+Current primary objects are **Organization, Person and Opportunity**; Applicant/HiringManager are Person profiles. The [object architecture](../backend-architecture/OBJECT_ARCHITECTURE.md), [nine-step workflow](../backend-architecture/WORKFLOW_AND_INTEGRATIONS.md), and [questions/files/ElevenLabs adapter](../backend-architecture/QUESTIONS_AND_FILES.md) govern this voice slice. Add typed linkage for employee context and applicant inquiries; neither is extra scored screening. Historical imports may lack audio and must stay distinct from new direct submissions. Stage outcomes are event history and hypothesis inputs, not automatic model-training labels or policy updates.
+
 For Danish's Replit integration, start with the [object architecture and voice worker handoff](DANISH_OBJECT_AND_VOICE_HANDOFF.md), including request/result fixtures and the distinction between evidence collection, inference and training.
 
 ## Mission
