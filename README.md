@@ -1,31 +1,45 @@
 # Sauce
 
-Sauce has four main objects: **Organization, HiringManager, Applicant and Opportunity**. Everything else is nested. Opportunity is the complete job container: its description, questions, applications, answers, assessments and history.
+[**Open the working demo**](https://sauce-hiring-demo.parthag22.chatgpt.site)
 
-The basic flow is **manager creates an opportunity → applicant applies by voice → manager reviews**.
+Sauce turns a hiring team's context and candidate evidence into a small interview shortlist. This repository's `main` branch contains the same application as the hosted demo.
 
-## Team starting points
+## Demo flow
 
-- [Four-object architecture](backend-architecture/OBJECT_ARCHITECTURE.md)
-- [Danish / Replit handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md)
-- [Frontend handoff](docs/FRONTEND_HANDOFF.md)
-- [Four-object JSON example](backend-architecture/examples/four-object-example.json)
-- [Integration contract](docs/INTEGRATION_CONTRACT.md)
+1. **Company brain:** explore 10,000 fictional hiring records and edit company, team, role, and process context.
+2. **Criteria:** draft and approve requirements, then screen 2,400 fictional CVs.
+3. **Research:** run the sample research simulation across 12 sources. Disconnect sources and retry the sample failed connection.
+4. **Decisions:** review 5 definite interviews, 47 maybes, and 1,196 rejects. Inspect CVs, papers, code, and robot evaluation evidence.
+5. **Interview selection:** record notes, change decisions, and select up to 2, 3, or 5 people based on seniority.
+6. **Data flywheel:** record interview, offer, acceptance, and hiring outcomes. Refine the next search and approve its criteria again.
 
-## Inputs
+CSV and JSON imports, search, pagination, shortlist exports, saved browser state, and reset are functional. All candidates and evidence are fictional. Research and connector activity are simulations. The demo does not contact recruiting services or run live AI models.
 
-Manager: organization Markdown, JD Markdown and recorded voice vision. Applicant: credentials, work proposal, contacts/references. Screening has at most three questions, all answered by voice. Applicants can also ask the employer questions separately.
+## Run locally
 
-Three manager-weighted assessment components: composite profile, transcript content and approved observable vocal delivery. Criteria/weights remain Sagar's decisions. Contacts do not affect fit; voice analysis does not infer emotions/personality for hiring. Missing evidence stays unknown.
+Install Node.js 20 or later, then run:
 
-Historical imports, interviews, suggested patterns and a hiring summary are optional fields within Opportunity.history. They are not required workflow stages. Preserve shortlisted, offered, accepted and hired distinctly.
+```sh
+npm start
+```
 
-## Current implementation
+Open `http://localhost:3000`. No dependency installation, API keys, database, or account is required. The `PORT` environment variable controls the server port.
 
-[Open Sauce](https://sauce-vision-production.up.railway.app) → [live portal](https://sauce-vision-production.up.railway.app/portal). The landing page routes managers and applicants into the same compact, authenticated portal. Jobs, profiles, applications, historical imports and original voice recordings use a private backend and persistent Railway volume. Groq transcription is connected; users review their words before submission. New live accounts start empty.
+## Deploy
 
-The [sample demo](https://sauce-vision-production.up.railway.app/demo) remains separate and fictional. Real scores stay unknown: automated matching, sentiment analysis, model training and a Sauce MCP endpoint are not implemented. There is no existing applicant pool yet; CSV/JSON imports are available when one exists. Chewbacca remains a functionality reference, rather than a live research integration.
+The `public/` directory is the complete website. `npm run build` copies it into `dist/` for static hosting. The included GitHub Actions workflow publishes `public/` to GitHub Pages when `main` changes, once Pages is configured to use GitHub Actions.
 
-Frontend and Danish/Replit teams should start with the [live API handoff](docs/LIVE_API_HANDOFF.md). See [deployment instructions](landing/README.md). Existing architecture documents describe broader planned capabilities beyond this first connected slice.
+The Dockerfile runs the same app on any host that supports Docker. The production server respects the host's `PORT` setting.
 
-The native iMessage client remains in [amber-imessage](https://github.com/sagartiw/amber-imessage). Both iMessage and MCP will use the shared Sauce backend. This independent Sauce checkout lives in amber-imessage/Sauce and is ignored by the parent repository.
+## Previous version
+
+The complete earlier implementation is preserved on [archive/pre-demo-2026-10-10](https://github.com/parthag2211/Sauce/tree/archive/pre-demo-2026-10-10), at commit `d89ab99845fcc2279e47d8887f0ec6ab27652d9b`. Its history remains intact.
+
+## Checks
+
+```sh
+npm run check
+npm run build
+```
+
+The demo was checked in the browser on desktop and mobile, including imports, criteria approval, evidence review, saved notes, interview limits, exports, and hiring outcomes.

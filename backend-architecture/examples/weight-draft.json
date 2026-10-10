@@ -1,9 +1,0 @@
-{
-  "job_version_id": "job-v1",
-  "status": "draft",
-  "weights": {
-    "composite_profile": null,
-    "voice_transcript": null,
-    "voice_behaviors": null
-  }
-}
