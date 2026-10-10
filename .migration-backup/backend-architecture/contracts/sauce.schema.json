@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sauce.example/contracts/architecture-draft.schema.json",
+  "title": "Sauce illustrative draft contracts",
+  "$comment": "Illustrative contracts only. Cross-record ownership, unique ordinals, positive-weight completeness and weight sums require service/database validation.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/manager_intake"
+    },
+    {
+      "$ref": "#/$defs/question_set"
+    },
+    {
+      "$ref": "#/$defs/voice_answer"
+    },
+    {
+      "$ref": "#/$defs/applicant_intake"
+    },
+    {
+      "$ref": "#/$defs/weight_draft"
+    }
+  ],
+  "$defs": {
+    "manager_intake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "organization_md": {
+          "$ref": "#/$defs/artifact"
+        },
+        "jd_md": {
+          "$ref": "#/$defs/artifact"
+        },
+        "vision_audio": {
+          "$ref": "#/$defs/artifact"
+        },
+        "vision_transcript_version_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "organization_md",
+        "jd_md",
+        "vision_audio",
+        "vision_transcript_version_id"
+      ]
+    },
+    "question_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "job_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "approved"
+          ]
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/question"
+          }
+        }
+      },
+      "required": [
+        "job_version_id",
+        "version",
+        "status",
+        "questions"
+      ]
+    },
+    "voice_answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audio_artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "transcript_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_mode": {
+          "const": "voice"
+        },
+        "reviewed_by_applicant": {
+          "const": true
+        }
+      },
+      "required": [
+        "application_id",
+        "question_id",
+        "audio_artifact",
+        "transcript_version_id",
+        "input_mode",
+        "reviewed_by_applicant"
+      ]
+    },
+    "applicant_intake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "credentials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "education",
+                  "employment"
+                ]
+              },
+              "organization": {
+                "type": "string",
+                "minLength": 1
+              },
+              "role_or_degree": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "organization",
+              "role_or_degree"
+            ]
+          }
+        },
+        "work_proposal": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "statement"
+          ]
+        },
+        "contacts_and_references": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "linkedin_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "email": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "phone": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "references": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contact": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "permission_to_contact": {
+                    "enum": [
+                      "unknown",
+                      "recorded"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "relationship",
+                  "contact",
+                  "permission_to_contact"
+                ]
+              }
+            }
+          },
+          "required": [
+            "references"
+          ]
+        }
+      },
+      "required": [
+        "credentials",
+        "work_proposal",
+        "contacts_and_references"
+      ]
+    },
+    "weight_draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_version_id",
+        "status",
+        "weights"
+      ],
+      "properties": {
+        "job_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "draft"
+        },
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "composite_profile",
+            "voice_transcript",
+            "voice_behaviors"
+          ],
+          "properties": {
+            "composite_profile": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "voice_transcript": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "voice_behaviors": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "artifact_id",
+        "content_hash"
+      ]
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "ordinal",
+        "text",
+        "source_claim_ids"
+      ]
+    }
+  }
+}

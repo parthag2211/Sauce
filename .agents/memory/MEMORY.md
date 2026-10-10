@@ -1,0 +1,1 @@
+- [Walkthrough preservation](walkthrough-preservation.md) — Keep the illustrative Sauce walkthrough separate from the functional hiring app.

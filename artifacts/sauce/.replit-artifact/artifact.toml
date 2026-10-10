@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Sauce"
+description = "The existing Sauce interactive product walkthrough, preserved with its original screens, styling, and interactions."
+version = "1.0.0"
+id = "artifacts/sauce"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23093
+
+[services.development]
+run = "pnpm --filter @workspace/sauce run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sauce", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sauce/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23093"
+BASE_PATH = "/"

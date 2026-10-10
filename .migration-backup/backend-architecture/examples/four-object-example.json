@@ -1,0 +1,174 @@
+{
+  "organizations": [
+    {
+      "id": "org-demo",
+      "name": "Example Company",
+      "organizationMarkdown": {
+        "fileId": "file-org-md",
+        "fileName": "organization.md"
+      },
+      "teams": [
+        "Operations"
+      ],
+      "hiringManagerIds": [
+        "manager-demo"
+      ],
+      "opportunityIds": [
+        "opportunity-demo"
+      ]
+    }
+  ],
+  "hiringManagers": [
+    {
+      "id": "manager-demo",
+      "name": "Demo Manager",
+      "organizationId": "org-demo",
+      "opportunityIds": [
+        "opportunity-demo"
+      ]
+    }
+  ],
+  "applicants": [
+    {
+      "id": "applicant-demo",
+      "name": "Demo Applicant",
+      "credentials": {
+        "fileId": "file-credentials-md",
+        "fileName": "credentials.md"
+      },
+      "workProposal": {
+        "fileId": "file-proposal-md",
+        "fileName": "proposal.md"
+      },
+      "contactInformation": {
+        "email": "applicant@example.com"
+      },
+      "references": [],
+      "opportunityIds": [
+        "opportunity-demo"
+      ]
+    }
+  ],
+  "opportunities": [
+    {
+      "id": "opportunity-demo",
+      "isDemo": true,
+      "organizationId": "org-demo",
+      "hiringManagerId": "manager-demo",
+      "title": "Operations lead",
+      "team": "Operations",
+      "seniority": null,
+      "jobDescription": {
+        "fileId": "file-jd-md",
+        "fileName": "job-description.md",
+        "requirements": []
+      },
+      "organizationContext": {
+        "organizationMarkdownFileId": "file-org-md"
+      },
+      "managerVision": {
+        "audioFileId": "file-manager-audio",
+        "transcript": {
+          "original": "Help us turn a new idea into a dependable operation.",
+          "reviewed": null
+        }
+      },
+      "questions": {
+        "forApplicants": [
+          {
+            "id": "q1",
+            "text": "Describe an operation you improved. What did you own?",
+            "responseMode": "voice"
+          },
+          {
+            "id": "q2",
+            "text": "How would you approach the first month in this role?",
+            "responseMode": "voice"
+          },
+          {
+            "id": "q3",
+            "text": "Which work do you want to own, and where would you need support?",
+            "responseMode": "voice"
+          }
+        ],
+        "fromApplicants": [
+          {
+            "applicantId": "applicant-demo",
+            "question": "What support will the team provide?",
+            "replies": [],
+            "visibility": "private",
+            "affectsFit": false
+          }
+        ]
+      },
+      "scoring": {
+        "criteria": [],
+        "weights": {
+          "composite_profile": null,
+          "voice_transcript": null,
+          "voice_behaviors": null
+        },
+        "managerApproved": false
+      },
+      "applications": [
+        {
+          "applicantId": "applicant-demo",
+          "status": "draft",
+          "submittedProfile": null,
+          "voiceAnswers": [
+            {
+              "questionId": "q1",
+              "audio": {
+                "fileId": "file-answer-audio",
+                "fileName": "answer-1.m4a"
+              },
+              "transcript": {
+                "original": "I helped organize a weekly volunteer program.",
+                "reviewed": null
+              },
+              "processingStatus": "demo_only"
+            }
+          ],
+          "assessment": {
+            "composite_profile": null,
+            "voice_transcript": null,
+            "voice_behaviors": null,
+            "overall": null,
+            "evidence": [],
+            "gaps": [
+              "Questions, criteria, weights and submission are not yet approved/complete."
+            ]
+          },
+          "outcomeHistory": []
+        }
+      ],
+      "history": {
+        "previousApplicants": [
+          {
+            "resume": {
+              "fileId": "file-prior-resume",
+              "fileName": "resume.pdf"
+            },
+            "source": "historical_import",
+            "outcomeHistory": [
+              {
+                "stage": "offered",
+                "sourceRow": 2
+              },
+              {
+                "stage": "accepted",
+                "sourceRow": 3
+              }
+            ],
+            "note": "No hired event is documented."
+          }
+        ],
+        "employeeInterviews": [],
+        "managerInterviews": [],
+        "patternNotes": [],
+        "hiringSummary": null,
+        "previousRevisions": []
+      }
+    }
+  ]
+}

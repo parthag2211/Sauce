@@ -1,0 +1,11 @@
+{
+  "application_id": "application-demo",
+  "question_id": "q1",
+  "audio_artifact": {
+    "artifact_id": "answer-audio-demo",
+    "content_hash": "synthetic-answer-hash"
+  },
+  "transcript_version_id": "answer-t1",
+  "input_mode": "voice",
+  "reviewed_by_applicant": true
+}

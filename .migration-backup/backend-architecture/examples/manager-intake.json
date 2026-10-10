@@ -1,0 +1,15 @@
+{
+  "organization_md": {
+    "artifact_id": "org-md-demo",
+    "content_hash": "synthetic-org-hash"
+  },
+  "jd_md": {
+    "artifact_id": "jd-md-demo",
+    "content_hash": "synthetic-jd-hash"
+  },
+  "vision_audio": {
+    "artifact_id": "vision-audio-demo",
+    "content_hash": "synthetic-audio-hash"
+  },
+  "vision_transcript_version_id": "vision-t1"
+}

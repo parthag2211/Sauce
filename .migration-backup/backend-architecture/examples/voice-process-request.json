@@ -1,0 +1,23 @@
+{
+  "schema_version": "sauce.voice.v1",
+  "event_type": "voice.process_requested.v1",
+  "request_id": "voice-run-demo-01",
+  "idempotency_key": "voice-run-demo-01-attempt-1",
+  "attempt": 1,
+  "source_role": "applicant_answer",
+  "context": {
+    "workspace_id": "workspace-demo",
+    "application_id": "application-demo",
+    "job_version_id": "job-demo-v1",
+    "question_id": "question-demo-1",
+    "answer_take_id": "take-demo-1"
+  },
+  "input": {
+    "audio_artifact_id": "audio-demo-1",
+    "audio_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "language_hint": "en"
+  },
+  "tasks": ["transcribe", "align_original_asr", "recording_quality", "observable_delivery"],
+  "measurement_spec_version": "delivery-demo-v1",
+  "fixture_only": true
+}
