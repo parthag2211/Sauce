@@ -1,0 +1,21 @@
+{
+  "credentials": [
+    {
+      "kind": "employment",
+      "organization": "Example Studio",
+      "role_or_degree": "Project lead",
+      "source_claim_ids": [
+        "self-report-demo"
+      ]
+    }
+  ],
+  "work_proposal": {
+    "statement": "Open to scoped operations projects with clear deliverables."
+  },
+  "contacts_and_references": {
+    "linkedin_url": "https://www.linkedin.com/in/synthetic-example",
+    "email": "applicant@example.com",
+    "phone": null,
+    "references": []
+  }
+}
