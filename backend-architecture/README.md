@@ -1,65 +1,20 @@
-# Sauce backend architecture package
+# Sauce backend design
 
-Status: design proposal for Sagar and the Sauce pair programmer; no database migration,
-service implementation, scoring weights, or production behavior is approved by this package.
+**Four main objects: Organization, HiringManager, Applicant and Opportunity. Everything else is nested.**
 
-Destination: https://github.com/parthag2211/Sauce. Source client repository:
-https://github.com/sagartiw/amber-imessage. This folder has no dependency on SwiftUI,
-iMessage, the upstream Amber server, or Apple bundle identifiers. This folder is the starting design review now included in Sauce. Before this contribution,
-the repository contained only a README (commit
-`0839e950c0765f02f98ba3b5f0486fb17b34d5c5`); no backend stack is established yet.
+Start with [the short object architecture](OBJECT_ARCHITECTURE.md). It supersedes the earlier Person-based model and expanded entity diagrams. Opportunity is the complete job container, including its description, applications, answers and results.
 
-## Confirmed requirements
+The basic flow is **create → apply by voice → manager review**. Historical imports, interviews, suggested patterns and a hiring summary are optional tools inside Opportunity.history, not a required nine-step journey.
 
-Primary objects are **Organization, Person and Opportunity**; Applicant and HiringManager are Person role profiles. The authoritative [object architecture](OBJECT_ARCHITECTURE.md) maps these to the frontend's [nine-step hiring cycle](WORKFLOW_AND_INTEGRATIONS.md). Opportunity contains [both directions of applicant questions plus discovery/context questions](QUESTIONS_AND_FILES.md). Historical shortlisted/offered/accepted/hired events stay distinct. ElevenLabs is an available transcription integration candidate, with capabilities documented in the file contract; no provider connection is claimed.
+## Team handoff
 
-Hiring manager intake has three sources: organization `.md` upload, JD `.md` upload,
-and a recorded voice description of the ideal hire. Sauce generates at most three
-screening questions from that brief for manager review. Every screening answer is voice
-based. Applicant intake has three sections: academic/work credentials, a proposal about
-the work they are open to, and their contact details plus references. Applicant intake
-source format now includes applicant Markdown cross-referencing at Sagar's request:
-credential and proposal Markdown are proposed originals; the exact structure and intake UX
-remain open. Contacts/references stay separately structured. The voice-only requirement
-applies to screening answers, not all applicant profile sections.
+- [Danish / Replit](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md)
+- [Frontend](../docs/FRONTEND_HANDOFF.md)
+- [Four-object example](examples/four-object-example.json)
+- [Shared integration contract](../docs/INTEGRATION_CONTRACT.md)
 
-The manager configures weights for composite applicant profile, voice transcript content,
-and voice intonation/behaviors; see the scoring model for assessment boundaries.
+## Details when needed
 
-Both iMessage and MCP will call the same domain service against the same records.
-Current scope is backend architecture and scoring design only. This package changes no
-applicant UI, deployed backend, MCP endpoint, iOS build, or TestFlight distribution.
+[Simple workflow and integrations](WORKFLOW_AND_INTEGRATIONS.md), [nested storage notes](DATA_MODEL.md), [questions/files](QUESTIONS_AND_FILES.md), [scoring](SCORING_MODEL.md), [Chewbacca source references](CHEWBACCA_REFERENCES.md), [decisions](DECISIONS.md).
 
-## Read in order
-
-Start with [Organization, Person and Opportunity](OBJECT_ARCHITECTURE.md), [workflow/integrations](WORKFLOW_AND_INTEGRATIONS.md), [questions/files](QUESTIONS_AND_FILES.md), then [Danish's Replit handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md) for voice-worker fixtures and future training tracks.
-
-1. [Data model](DATA_MODEL.md): entities, ownership, versioning, states and invariants.
-2. [Scoring model](SCORING_MODEL.md): evidence-first evaluation and configurable rubric.
-3. [Service boundary](SERVICE_BOUNDARY.md): portable domain commands, HTTP/MCP adapters.
-4. [Chewbacca references](CHEWBACCA_REFERENCES.md): inspected code and adaptation plan.
-5. [Decision log](DECISIONS.md): confirmed requirements and decisions still owned by Sagar.
-6. [Contracts](contracts/sauce.schema.json) and [synthetic examples](examples/): illustrative
-   validation contracts, not production migrations or claims of enforced authorization.
-
-## Pair-programming handoff
-
-The backend collaborator should review the entity relationships and state transitions,
-propose changes with sample records, and obtain Sagar's decisions before migrations.
-The client can later consume agreed commands without owning the hiring data model.
-Sauce write access is confirmed for this documentation contribution. The package is
-published here with dedicated [frontend](../docs/FRONTEND_HANDOFF.md) and
-[backend/voice](../docs/BACKEND_VOICE_HANDOFF.md) handoffs. No upstream source code
-from Chewbacca is vendored here; this package references patterns and inspected files.
-
-## Acceptance for the later implementation
-
-- A manager uploads both Markdown files and records voice; interpretation preserves source evidence.
-- A confirmed job version has between one and three manager-approved questions.
-- An applicant has three profile sections and records an answer to each screening question.
-- Submission pins profile, question-set, answer and job versions; later edits do not rewrite it.
-- A manager can review only applications authorized for their organization/job; a group card grants
-  no access to applicant contacts, references or another applicant's answers.
-- iMessage and MCP operate on those same records and pass identical authorization checks.
-- Scoring remains disabled until an approved rubric is present; missing evidence stays unknown.
-- Replayed requests and repeated evaluation runs do not create duplicate submissions or results.
+This is a design package in parthag2211/Sauce; no hiring backend, approved scoring model or live MCP endpoint is implemented. The native client stays in sagartiw/amber-imessage. Internal persistence/versioning can preserve originals, ownership, stable submissions and safe retries without adding product objects. Existing v1 schemas/events remain limited legacy illustrations, not the current public object model.

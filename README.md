@@ -1,54 +1,29 @@
 # Sauce
 
-Sauce is a voice-powered applicant marketplace built around **Organization, Person, and Opportunity**.
-Applicant and HiringManager are profiles/roles of Person. Hiring managers provide organizational
-context, a job description, and a spoken vision for the ideal hire. Applicants provide
-a profile and answer up to three screening questions by voice.
+Sauce has four main objects: **Organization, HiringManager, Applicant and Opportunity**. Everything else is nested. Opportunity is the complete job container: its description, questions, applications, answers, assessments and history.
 
-This repository contains the **architecture, team handoff, and visual product walkthrough**.
-Explore the [live Sauce vision](https://sauce-vision-production.up.railway.app), or see
-[landing page development and deployment instructions](landing/README.md).
-There is no working hiring backend, application-submission frontend, deployed Sauce MCP
-URL, or scoring implementation in this repository yet. The landing page uses illustrative data.
-Sagar owns final data architecture and scoring decisions; proposed contracts are identified
-as such so the teams can work toward one implementation without treating guesses as facts.
+The basic flow is **manager creates an opportunity → applicant applies by voice → manager reviews**.
 
 ## Team starting points
 
-- **Start here:** [Organization, Person and Opportunity architecture](backend-architecture/OBJECT_ARCHITECTURE.md).
-- **Frontend journey / backend workflow:** [Nine-step cycle, hypothesis and integration plan](backend-architecture/WORKFLOW_AND_INTEGRATIONS.md).
-- **Both sides' questions and file types:** [Question purposes, imports and voice processing](backend-architecture/QUESTIONS_AND_FILES.md).
-- **Danish / Replit integration:** [Object architecture, three evaluators, voice storage and training handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
-- **Frontend team:** [Frontend handoff](docs/FRONTEND_HANDOFF.md).
-- **Backend and voice-data counterpart:** [Backend and voice handoff](docs/BACKEND_VOICE_HANDOFF.md).
-- **Both teams:** [Shared integration contract](docs/INTEGRATION_CONTRACT.md).
-- **Architecture review:** [Data model](backend-architecture/DATA_MODEL.md),
-  [scoring model](backend-architecture/SCORING_MODEL.md), and
-  [decision log](backend-architecture/DECISIONS.md).
-- **Reusable functionality:** [Chewbacca source references and porting instructions](backend-architecture/CHEWBACCA_REFERENCES.md).
+- [Four-object architecture](backend-architecture/OBJECT_ARCHITECTURE.md)
+- [Danish / Replit handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md)
+- [Frontend handoff](docs/FRONTEND_HANDOFF.md)
+- [Four-object JSON example](backend-architecture/examples/four-object-example.json)
+- [Integration contract](docs/INTEGRATION_CONTRACT.md)
 
-## Confirmed product contract
+## Inputs
 
-| Side | Inputs |
-| --- | --- |
-| Hiring manager | Organization Markdown upload, JD Markdown upload, recorded voice vision. |
-| Applicant profile | Academic/work credentials, work proposal, contact information and references. |
-| Screening | Sauce generates at most three questions for manager review; every screening response is voice based. |
-| Scoring configuration | Manager controls weights for composite applicant profile, applicant voice transcript content, and applicant voice intonation/behaviors. |
+Manager: organization Markdown, JD Markdown and recorded voice vision. Applicant: credentials, work proposal, contacts/references. Screening has at most three questions, all answered by voice. Applicants can also ask the employer questions separately.
 
-Contact details identify and connect people; they do not contribute to fit. Voice-behavior
-analysis is limited to explicit observable job-related measures, with human review;
-it does not infer personality, emotions, health or demographic traits.
+Three manager-weighted assessment components: composite profile, transcript content and approved observable vocal delivery. Criteria/weights remain Sagar's decisions. Contacts do not affect fit; voice analysis does not infer emotions/personality for hiring. Missing evidence stays unknown.
 
-## Repository boundary
+Historical imports, interviews, suggested patterns and a hiring summary are optional fields within Opportunity.history. They are not required workflow stages. Preserve shortlisted, offered, accepted and hired distinctly.
 
-Sauce owns the future backend and the web frontend if the frontend team chooses that surface.
-The native iMessage client remains in [amber-imessage](https://github.com/sagartiw/amber-imessage).
-Both iMessage and MCP must use the same authorized domain services and persisted records.
-Local checkout: `amber-imessage/Sauce`, an independent Git repository ignored by the parent.
-The `chewbacca` source remote is a local convenience; team members can add it using the
-instructions in the references document. No Chewbacca runtime code has been copied yet.
+## Current implementation
 
-Start with a synthetic, fixture-backed flow. Agree on contracts and rating anchors before
-migrations, live audio processing or numerical evaluations. Each team handoff includes its
-first deliverables, acceptance checks and the decisions that still need Sagar.
+This repository contains design documents and an [illustrative landing page](https://sauce-vision-production.up.railway.app). The landing page explains earlier vision details; the four-object architecture above is the current design contract. There is no working hiring backend, submission frontend, deployed Sauce MCP endpoint or trained scoring model yet.
+
+Danish uses Replit. ElevenLabs is an available transcription candidate; Chewbacca is a source for scoped import/history functionality. Neither runtime integration is implemented. See [technical details](backend-architecture/README.md) and [landing deployment instructions](landing/README.md).
+
+The native iMessage client remains in [amber-imessage](https://github.com/sagartiw/amber-imessage). Both iMessage and MCP will use the shared Sauce backend. This independent Sauce checkout lives in amber-imessage/Sauce and is ignored by the parent repository.

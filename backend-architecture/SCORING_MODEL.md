@@ -1,109 +1,33 @@
-# Sauce scoring model — three manager-weighted components
+# Sauce scoring inside an opportunity
 
-Current domain: Organization, Person and Opportunity. The executable rubric lives in an Opportunity's immutable **RolePolicyVersion**; earlier `job_version` / `rubric_version` names are legacy illustrations. The [nine-step workflow](WORKFLOW_AND_INTEGRATIONS.md) adds reviewed historical patterns, employee/manager context, a 7–8-line hypothesis and versioned policy approval. These propose criteria; they do not add a fourth score or automatically train a model. Prioritized review is now part of the requested journey, with exact ordering/tie rules still open; compare only the same policy and show unknowns separately. Shortlisted/offered/accepted/hired history is not ground-truth job performance. Applicant inquiries never become additional screening evidence.
+The four main objects are Organization, HiringManager, Applicant and Opportunity. Scoring is nested data, not another main object.
 
-## Confirmed configuration
+## Configuration and results
 
-Sagar defines three scoring components:
+The manager defines criteria and weights in **Opportunity.scoring**. Each applicant's results live in **Opportunity.applications[].assessment**.
 
-1. **Composite applicant profile:** academic/work credentials, work proposal and
-   permitted reference evidence. Contact information serves identity and communication.
-2. **Applicant voice transcript:** the content of their recorded screening answers.
-3. **Applicant voice intonation and behaviors:** explicitly defined observable delivery
-   measures from those recordings, with human review and recording-quality checks.
+| Component | Evidence |
+| --- | --- |
+| composite_profile | Relevant credentials/work proposal against the job requirements; permitted verified reference evidence if available. |
+| voice_transcript | What the applicant says in the approved screening answers, assessed against content criteria. |
+| voice_behaviors | Explicitly approved observable job-related delivery measures from the original recordings, with quality checks and human review. |
 
-The hiring manager sets each component's weight in the future frontend. Backend commands
-validate and store those weights for a specific job and immutable rubric version. These
-are applicant-side components; organization Markdown, JD Markdown and manager vision are
-sources for defining the role and rubric. They are not the three weighted components.
+Organization Markdown, JD Markdown and manager vision define the target requirements. They are not the weighted components. Contacts/reference listings, names, prestige, protected traits or their proxies do not improve fit. Voice analysis does not infer emotion/personality, honesty or demographic traits for hiring.
 
-No default weights are supplied. Criterion anchors, delivery measures, thresholds and
-whether to show ranking remain Sagar's decisions. No live scoring is implemented here.
+## Simple scoring rule
 
-## Proposed weight contract and aggregate
+After criteria/anchors are defined on a common scale:
 
-Represent weights as `composite_profile`, `voice_transcript`, `voice_behaviors`, each in
-[0,1], summing to 1 (within a defined numerical tolerance, proposed 1e-6). The frontend may
-show percentages, but the backend stores normalized values and rejects invalid totals;
-it does not silently renormalize. Zero disables that component for aggregate scoring.
-An explicit manager action confirms a versioned configuration. Changes create a new version.
+`overall = profileWeight * profileScore + transcriptWeight * transcriptScore + deliveryWeight * deliveryScore`
 
-For approved per-component scores on a common 0–100 scale, the proposed formula is:
+Manager weights are normalized, total one, and have no approved defaults. Reject invalid totals rather than silently renormalizing. Without approved criteria/weights, return unconfigured/null results. A positive-weight component with missing/conflicting/unusable evidence makes the aggregate null; do not substitute zero or redistribute its weight. A zero-weight component may be unassessed and is omitted from the sum, rather than multiplying null by zero. Keep evidence/gaps alongside each result. An unknown result is not a failed applicant.
 
-`overall = w_profile * s_profile + w_transcript * s_transcript + w_behaviors * s_behaviors`
+Recording quality and observed delivery are different from suitability. A pause/rate measurement has no inherent good/bad meaning without a defensible job criterion. If none exists, delivery stays unscored. Questions applicants ask the employer are not scoring evidence, and extra screening cannot be hidden in inquiry threads or interviews.
 
-This formula is a recommendation for review, not an implemented evaluator. Per-component
-rating anchors must be defined before numeric scoring is enabled. Weights alone cannot
-establish what constitutes a good profile, answer or communication behavior. A draft with
-null weights/anchors yields `not_configured`, aggregate null and no ranking.
+## History is nested too
 
-For every positive-weight component, insufficient/conflicting evidence produces aggregate
-null under the proposed conservative missingness policy. Never turn an unavailable recording
-into zero or silently redistribute its weight. A zero-weight component may be unassessed
-without blocking the aggregate. Report coverage as the sum of supported positive weights;
-include each component's state and score so the number remains interpretable.
+Store the submitted profile/selected answers and assessment settings with the application's saved submission; retain prior settings/results under nested revision history. Later edits do not silently change an earlier result. Compare applicants only with the same scoring settings and adequate evidence; show unknowns separately. Exact prioritization/tie rules still need Sagar's definition. The manager makes stage decisions; a score does not automatically reject, offer or hire.
 
-## Component evidence and rating boundaries
+Optional imported resumes/outcomes and interview notes belong to Opportunity.history. Historical patterns may suggest job-related criteria for manager review, but advancement is not proof of performance. Do not automatically change weights or train models when outcomes arrive. Transcript/audio training requires separately eligible data, human-reviewed task labels and held-out evaluation; keep its provenance internal.
 
-| Component | Inputs | Assessment design |
-| --- | --- | --- |
-| Composite profile | Submitted credential history, applicant work proposal, and any explicitly permitted verified reference material. | Job-related rubric anchors such as demonstrated relevant work and alignment with the applicant's proposed scope. Preserve self-report versus verification status. Contact fields and a mere reference listing do not create positive evidence. |
-| Voice transcript | Applicant-reviewed transcripts for the pinned set of at most three questions. | Assess answer content against approved question/requirement anchors, with exact source citations. Correction history is retained; transcription uncertainty is not poor applicant performance. |
-| Voice behaviors | Original answer audio and timestamped measurements, tied to recording quality and metric version. | Describe observable measures such as speaking rate and pause timing. Any scoring needs explicit job-related communication criteria and human review. No personality, emotion, honesty, intelligence, health, disability, demographic or protected-trait inference. Accent and pitch are not fit criteria. |
-
-The third component stores evidence and interpretable measurements rather than a label
-such as “confident” or “culture fit.” A long pause could reflect a connection failure;
-quality checks can make a measure unavailable. Intonation cannot be used to infer hidden
-traits. Retain metric units, observed interval, extraction method and uncertainty; do not
-claim a derived measurement is validated just because it can be computed. Delivery behavior
-assessments support review; they never trigger automatic rejection or hiring decisions.
-If no defensible role-specific behavior anchors are configured, this component is unscored.
-The manager must then explicitly set its weight to zero or leave the overall score unknown.
-
-Manager vision can suggest job-related rubric anchors, but ambiguous vibes stay unresolved
-until clarified. Avoid counting the same transcript claim repeatedly just because it also
-appears on a profile: show source overlaps and let criterion design specify how they count.
-Do not multiply profile quality by reference quantity or prestige. Do not contact references
-automatically or treat provided contact details as verified endorsements.
-
-## Evaluation records and execution
-
-`rubric_version`: job_version, configuration status, creator/approver, three component
-weights, per-component anchors, allowed evidence, required factual requirements, missingness
-policy, intended presentation fit_description/ranking (undecided), version and content hash.
-
-`voice_behavior_observation`: answer_take_id, audio artifact id, metric name/unit/value,
-start/end timestamps, extraction method/version, quality state, uncertainty and source hash.
-These are private application data. No such observations currently exist in the runtime.
-
-`component_assessment`: evaluation id, component key, status supported/insufficient/conflicting/
-not_applicable/failed, score null/value, rubric anchor IDs, source citations and reasoning.
-Missingness is separate from evaluator failure. A model's confidence is not a fit score.
-
-`evaluation`: immutable submission id, pinned job/profile/question/answer versions,
-rubric_version, input digest, model/prompt/metric versions, three component assessments,
-aggregate null/value, coverage, factual requirement states, status and timestamps.
-The service verifies that rubric and submission belong to the same job and authorized tenant.
-Factual requirements are met/unmet/unknown separately from the weighted score; unknown
-is never silently converted to unmet. No score constitutes an automatic hiring decision.
-
-Compute aggregate deterministically after validating structured assessments. Models cannot
-change weights or invent a fourth component. Raw contact data is excluded from scoring
-requests. Results are append-only; a current-result pointer references the appropriate run.
-A new rubric, answer correction, audio take or submission creates a new input digest.
-Retries reuse the same run key; explicit reevaluation records its reason and version.
-Deletion of retained source material removes derived indexes/metrics and marks historical
-results as no longer fully reproducible. Retention policy still requires a decision.
-
-## Review fixtures before implementation
-
-Freeze human-labeled examples before evaluating: strong/weak content, sparse credentials,
-unknown references, corrected transcript, unusable audio, accent variants with equivalent
-content, positive-weight missing component, zero-weight missing component, revised weights,
-stale rubric confirmation, duplicate retry and wrong-job access. Contact-only changes must
-not affect fit. Identical content should have identical transcript-content assessments;
-voice behavior analysis must not smuggle delivery judgments into the transcript component.
-
-Compare per-component agreement, abstention, recording-quality failures and overall coverage.
-Sagar defines acceptance limits and reviews disagreements before enabling scoring. No live
-model calls, audio analysis or hiring outcomes were tested in this architecture phase.
+All scoring here is a design. No numerical anchors, trained evaluators or live scoring implementation exists yet. See [the four-object architecture](OBJECT_ARCHITECTURE.md) and [Danish handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).

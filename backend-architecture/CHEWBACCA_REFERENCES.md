@@ -1,6 +1,6 @@
 # Chewbacca functionality to consider for Sauce
 
-For the current Organization/Person/Opportunity workflow, see [the scoped functionality map](WORKFLOW_AND_INTEGRATIONS.md#pulling-from-chewbacca). That update inspects locally fetched revision `5d45c826fa8df6354ce5963b968efb0f51319094` for observation supersession, employment/score history and preview/apply import protection. The older pinned inventory below remains source background. Neither inventory claims a runtime port or newest-remote verification.
+For the current four-object design and simple workflow, see [workflow and integrations](WORKFLOW_AND_INTEGRATIONS.md). Locally fetched revision `5d45c826fa8df6354ce5963b968efb0f51319094` was also inspected for observation supersession, employment/score history and preview/apply import protection. These can support nested Opportunity history without adding main objects. The older pinned inventory below remains source background. Neither inventory claims a runtime port or newest-remote verification.
 
 Reference repository: https://github.com/calebnewtonusc/Chewbacca
 Inspected revision: `4b288c0f783e5bef5e21aedc1c4da050a2157b07`.
