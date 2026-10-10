@@ -3,12 +3,19 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { demoRoute } from './demo-router.mjs';
+import { createApi } from './backend/router.mjs';
+process.umask(0o077);
+const api=createApi();
 const root = fileURLToPath(new URL('./public/', import.meta.url));
-const assets = new Map([['/', 'demo/index.html'], ['/index.html', 'demo/index.html'], ['/vision', 'index.html'], ['/style.css', 'style.css'], ['/app.js', 'app.js'], ['/favicon.svg', 'favicon.svg'], ['/demo', 'demo/index.html'], ['/demo/', 'demo/index.html'], ...['demo.css','app.mjs','api.mjs','seed.mjs','logic.mjs','voice.mjs'].map(file=>[`/demo/${file}`,`demo/${file}`])]);
+const assets = new Map([['/', 'home.html'], ['/index.html', 'home.html'], ['/portal', 'portal.html'], ['/portal/', 'portal.html'], ['/vision', 'index.html'], ['/home.css', 'home.css'], ['/style.css', 'style.css'], ['/app.js', 'app.js'], ['/favicon.svg', 'favicon.svg'], ['/demo', 'demo/index.html'], ['/demo/', 'demo/index.html'], ...['demo.css','app.mjs','api.mjs','seed.mjs','logic.mjs','voice.mjs','portal.mjs','portal-voice.mjs'].map(file=>[`/demo/${file}`,`demo/${file}`])]);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml' };
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname === '/health') { res.writeHead(200, { 'Content-Type':'application/json' }); return res.end('{"status":"ok"}'); }
+  if (url.pathname.startsWith('/api/v1/')) {
+    try { const result=await api(req,res,url); if(res.writableEnded)return; res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});return res.end(JSON.stringify(result)); }
+    catch(error){res.writeHead(error.status||500,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({message:error.status?error.message:'Sauce could not save this request. Please try again.'}));}
+  }
   if (url.pathname.startsWith('/api/demo/')) {
     try {
       const result = await demoRoute(req, url.pathname);

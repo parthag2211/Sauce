@@ -6,3 +6,5 @@ test/
 !public/
 !public/demo/
 !public/demo/**
+.data/
+*.sqlite*

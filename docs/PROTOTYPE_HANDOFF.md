@@ -1,4 +1,6 @@
-# Sauce: simple demo handoff
+# Sauce: simple sample-demo handoff
+
+The authenticated, persistent counterpart is now documented in [LIVE_API_HANDOFF.md](LIVE_API_HANDOFF.md). This document describes only `/demo`, which remains fictional and browser-local.
 
 The interface has two modes and two actions per mode. Keep backend operations out of the main navigation.
 

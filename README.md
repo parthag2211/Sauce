@@ -22,8 +22,10 @@ Historical imports, interviews, suggested patterns and a hiring summary are opti
 
 ## Current implementation
 
-Try the [compact two-role demo](https://sauce-vision-production.up.railway.app/demo): managers post jobs and review applicants; applicants edit their profile and find roles with three voice questions. Its text and audio are saved only in the same browser. People and scores are fictional. See the [prototype team handoff](docs/PROTOTYPE_HANDOFF.md). There is no production hiring backend, live transcription, deployed Sauce MCP endpoint or trained scoring model yet. The simple demo is also the site homepage; the original team vision remains at `/vision`.
+[Open Sauce](https://sauce-vision-production.up.railway.app) → [live portal](https://sauce-vision-production.up.railway.app/portal). The landing page routes managers and applicants into the same compact, authenticated portal. Jobs, profiles, applications, historical imports and original voice recordings use a private backend and persistent Railway volume. Groq transcription is connected; users review their words before submission. New live accounts start empty.
 
-Danish uses Replit. ElevenLabs is an available transcription candidate; Chewbacca is a source for scoped import/history functionality. Neither runtime integration is implemented. See [technical details](backend-architecture/README.md) and [landing deployment instructions](landing/README.md).
+The [sample demo](https://sauce-vision-production.up.railway.app/demo) remains separate and fictional. Real scores stay unknown: automated matching, sentiment analysis, model training and a Sauce MCP endpoint are not implemented. There is no existing applicant pool yet; CSV/JSON imports are available when one exists. Chewbacca remains a functionality reference, rather than a live research integration.
+
+Frontend and Danish/Replit teams should start with the [live API handoff](docs/LIVE_API_HANDOFF.md). See [deployment instructions](landing/README.md). Existing architecture documents describe broader planned capabilities beyond this first connected slice.
 
 The native iMessage client remains in [amber-imessage](https://github.com/sagartiw/amber-imessage). Both iMessage and MCP will use the shared Sauce backend. This independent Sauce checkout lives in amber-imessage/Sauce and is ignored by the parent repository.

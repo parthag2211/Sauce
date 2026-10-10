@@ -1,14 +1,14 @@
-# Sauce web prototype
+# Sauce landing page and live portal
 
-[Play the demo](https://sauce-vision-production.up.railway.app/demo). The simple demo is also the site homepage. The original team vision remains at `/vision`.
+[Landing page](https://sauce-vision-production.up.railway.app) · [live portal](https://sauce-vision-production.up.railway.app/portal) · [fictional demo](https://sauce-vision-production.up.railway.app/demo)
 
-The compact demo has four actions: post a job, review applicants, edit your profile and find jobs. It starts with a fictional McKinsey undergraduate Business Analyst scenario and supports three question-by-question sample responses. People and scores are illustrative; nothing is submitted to McKinsey.
+The public landing page links both roles into a compact portal. Live users create an account, post jobs, save profiles, record/review voice answers and submit applications. Managers review submitted evidence and shortlist applicants. Real data starts empty. CSV/JSON historical imports are optional, with preview and confirmation. Real fit scores stay null; model training and automated matching are not implemented.
 
-Text and uploaded Markdown/text briefs remain in browser storage. Microphone recordings remain in IndexedDB. Live transcription, shared persistence, enrichment and model training are not connected. Sample scores are prewritten; changed applicant inputs receive no fabricated score. See [the team handoff](../docs/PROTOTYPE_HANDOFF.md).
+See [the frontend / Danish API handoff](../docs/LIVE_API_HANDOFF.md). The original internal vision remains at `/vision`; the browser-only fictional walkthrough remains at `/demo`.
 
 ## Run and verify
 
-Node.js 22 or newer; no dependencies to install.
+Node.js 22.13 or newer; no dependencies to install.
 
 ```sh
 cd landing
@@ -16,26 +16,27 @@ npm start
 npm test
 ```
 
-Open http://localhost:3000/demo. Set `PORT` for another port. `/health` reports server health. `/api/demo/contract` documents the separate stateless mock router, which the local-state UI does not use for persistence.
+Open http://localhost:3000. Local SQLite data is created in ignored `.data/`. Set `SAUCE_DATA_DIR` to another directory. Voice capture needs a supported browser on HTTPS (localhost is supported by compatible browsers). Optional provider configuration: `GROQ_API_KEY`, or `ELEVENLABS_API_KEY` if Groq is absent. Never place provider keys in frontend code.
 
-## Deploy
+## Railway
 
-Existing Railway project: `amberintelligence` (`758c0c59-8ac7-4cbd-9b29-f67075de8e72`). Production service: `sauce-vision` (`046d10cf-4098-4519-85b8-ce096af8be00`).
-
-From this directory:
+Project `amberintelligence` (`758c0c59-8ac7-4cbd-9b29-f67075de8e72`), production service `sauce-vision` (`046d10cf-4098-4519-85b8-ce096af8be00`). Persistent volume `sauce-vision-volume` (`141a67d1-b7de-44c2-af70-fd42285909cd`) mounts at `/data`. `RAILWAY_VOLUME_MOUNT_PATH` is injected by Railway. Startup prepares permissions then drops to the `node` user. Keep one replica.
 
 ```sh
 railway up . --path-as-root --no-gitignore --service sauce-vision --environment production --project 758c0c59-8ac7-4cbd-9b29-f67075de8e72 --detach
 ```
 
-Only this directory is deployed. Its local `.railwayignore` keeps demo assets included despite parent repository rules and excludes environment files. The included Dockerfile starts the dependency-free server on Railway's `PORT`. No provider secrets are needed. GitHub pushes do not redeploy the service automatically.
+The archive contains only this directory. `.railwayignore` excludes local data, tests and environment files while explicitly including demo assets despite parent ignore rules. GitHub pushes alone do not redeploy. `/health` reports server health; `/api/v1/session` identifies live API availability without exposing records. The deployed Groq credential is configured privately through Railway, not committed.
 
-## Files
+Default public origin is `https://sauce-vision-production.up.railway.app`. Set `SAUCE_PUBLIC_ORIGIN` when changing domains; write requests require an exact Origin match.
 
-- `public/demo/app.mjs`: two-role card UI and browser-only demo state.
-- `public/demo/demo.css`: compact mobile/desktop styling.
-- `public/demo/voice.mjs`: local audio capture and storage.
-- `public/demo/seed.mjs`, `logic.mjs`: fictional developer fixtures and mock evaluation helpers.
-- `demo-router.mjs`: stateless `/api/demo/*` routes with explicit mock limitations.
-- `public/index.html`, `app.js`, `style.css`: original team vision.
-- `server.mjs`: static assets, health and mock routing.
+## Code boundaries
+
+- `public/home.html`, `home.css`: public landing and role links.
+- `public/portal.html`, `public/demo/portal.mjs`: authenticated two-role UI.
+- `public/demo/portal-voice.mjs`: memory-only capture and authenticated upload.
+- `backend/`: private account, four-object domain, SQLite storage, voice and import logic.
+- `server.mjs`: static serving, health and HTTP routing.
+- `public/demo/app.mjs`: separate browser-only fictional demo.
+- `demo-router.mjs`: separate stateless mock namespace; never use it for real records.
+- `test/`: domain/access/persistence/import/transcription tests.
