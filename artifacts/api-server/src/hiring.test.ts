@@ -230,7 +230,39 @@ try {
   ok(true, "fresh process reads durable submitted snapshot and outcomes");
   ok(!!redactExpiredEvidence({ expiresAt: new Date(0).toISOString(), reviewedTranscript: "secret", originalAsr: "raw" }).errorCode, "expired snapshot is redacted immediately, including during read");
   await pool.query("UPDATE hiring_uploads SET data=jsonb_set(data,'{expiresAt}',to_jsonb(now()-interval '1 second')) WHERE id=$1", [voice.id]);
-  await expireRecordings(voice.id);
+  const expiring = (await pool.query("SELECT object_path,data->>'stagingPath' AS staging_path FROM hiring_uploads WHERE id=$1", [voice.id])).rows[0];
+  const actualStorage = new ObjectStorageService();
+  const removedObjectPaths = new Set<string>();
+  let expiryFailure: "before" | "between" | null = "before";
+  const flakyExpiryDelete = async (path: string) => {
+    if (expiryFailure === "before") {
+      expiryFailure = null;
+      throw Error("simulated expiry storage outage before first delete");
+    }
+    if (expiryFailure === "between" && removedObjectPaths.size === 1) {
+      expiryFailure = null;
+      throw Error("simulated expiry storage outage between sealed and staging deletes");
+    }
+    if (removedObjectPaths.has(path)) return;
+    const file = await actualStorage.getObjectEntityFile(path);
+    await file.delete({ ignoreNotFound: true });
+    removedObjectPaths.add(path);
+  };
+  await rejects(() => expireRecordings(voice.id, flakyExpiryDelete), "30-day expiry failure before object deletion can retry");
+  await rejects(() => authorizedFile(applicant, voice.id), "expired recording playback is blocked while purge is pending");
+  const stillPrivate = (await pool.query("SELECT data FROM hiring_uploads WHERE id=$1", [voice.id])).rows[0].data;
+  const hiddenWhilePending = redactExpiredEvidence(stillPrivate);
+  ok(!stillPrivate.deletedAt && !hiddenWhilePending.originalAsr && hiddenWhilePending.words.length === 0,
+    "expired transcript stays hidden although storage failure leaves the database transaction unchanged");
+  expiryFailure = "between";
+  await rejects(() => expireRecordings(voice.id, flakyExpiryDelete), "30-day expiry failure between sealed and staging deletion can retry");
+  ok(removedObjectPaths.has(expiring.object_path) && !removedObjectPaths.has(expiring.staging_path),
+    "partial expiry removes the sealed copy without committing transcript scrubbing early");
+  await expireRecordings(voice.id, flakyExpiryDelete);
+  ok([expiring.object_path, expiring.staging_path].every((p: string) => removedObjectPaths.has(p)),
+    "30-day retry removes the remaining staging object and tolerates the already-deleted sealed object");
+  await rejects(() => actualStorage.getObjectEntityFile(expiring.object_path), "sealed object is absent after 30-day retry");
+  await rejects(() => actualStorage.getObjectEntityFile(expiring.staging_path), "staging object is absent after 30-day retry");
   const expired = (await pool.query("SELECT data FROM hiring_uploads WHERE id=$1", [voice.id])).rows[0].data;
   const expiredOp = (await get(op.id)).data;
   const retainedAnswer = expiredOp.applications[0].submittedAnswers.find((a: any) => a.artifactId === voice.id);

@@ -31,7 +31,16 @@ export async function expireRecordings(targetId?: string, removeObject: RemovePr
       await c.query("UPDATE hiring_jobs SET state='failed',lease_token=NULL,updated_at=now() WHERE upload_id=$1", [row.id]);
       for (const path of new Set([row.object_path, row.data.stagingPath].filter(Boolean))) {
         // Not-found is an idempotent success in the default deleter; partial deletions can retry.
-        await removeObject(path as string);
+        try {
+          await removeObject(path as string);
+        } catch (error) {
+          logger.error({
+            uploadId: row.id,
+            objectKind: path === row.object_path ? "sealed" : "staging",
+            errorName: error instanceof Error ? error.name : "unknown",
+          }, "Recording object deletion failed; database evidence remains unchanged for retry");
+          throw error;
+        }
       }
       // Scrub every embedded copy, including replay caches, while preserving outcome/history metadata.
       const scrub = (v: any): any => {
