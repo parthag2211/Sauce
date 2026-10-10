@@ -11,6 +11,76 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /hiring/workspace:
+    get:
+      operationId: getHiringWorkspace
+      responses:
+        "200":
+          description: Authorized workspace
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HiringWorkspace" }
+  /hiring/opportunities/{id}:
+    get:
+      operationId: getHiringOpportunity
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Role-filtered opportunity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HiringRecord" }
+  /hiring/commands:
+    post:
+      operationId: runHiringCommand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HiringCommand" }
+      responses:
+        "200":
+          description: Persisted command result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HiringRecord" }
+  /hiring/uploads:
+    post:
+      operationId: requestHiringUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HiringUploadInput" }
+      responses:
+        "200":
+          description: Private direct upload reservation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HiringUpload" }
+  /hiring/uploads/{id}/finalize:
+    post:
+      operationId: finalizeHiringUpload
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Verified artifact metadata
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HiringRecord" }
+  /hiring/uploads/{id}:
+    get:
+      operationId: getHiringUpload
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Owner or authorized submitted-evidence viewer only
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +96,61 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    HiringRecord:
+      type: object
+      required: [id, revision, data]
+      properties:
+        id: { type: string }
+        revision: { type: integer }
+        data: { type: object, additionalProperties: true }
+    HiringWorkspace:
+      type: object
+      required: [userId, organizations, hiringManagers, applicant, opportunities, uploads, mode]
+      properties:
+        userId: { type: string }
+        mode: { type: string }
+        organizations:
+          type: array
+          items: { $ref: "#/components/schemas/HiringRecord" }
+        hiringManagers:
+          type: array
+          items: { $ref: "#/components/schemas/HiringRecord" }
+        applicant:
+          anyOf:
+            - { $ref: "#/components/schemas/HiringRecord" }
+            - { type: "null" }
+        opportunities:
+          type: array
+          items: { $ref: "#/components/schemas/HiringRecord" }
+        uploads:
+          type: array
+          items: { $ref: "#/components/schemas/HiringRecord" }
+    HiringCommand:
+      type: object
+      required: [action, idempotencyKey, payload]
+      properties:
+        action:
+          type: string
+          enum: [createOrganization, saveApplicant, createOpportunity, publishOpportunity, startApplication, addTake, reviewTake, submitApplication, askInquiry, replyInquiry, setOutcome, retryTranscription]
+        idempotencyKey: { type: string, minLength: 8, maxLength: 100 }
+        targetId: { type: string }
+        expectedRevision: { type: integer, minimum: 1 }
+        payload: { type: object, additionalProperties: true }
+    HiringUploadInput:
+      type: object
+      required: [name, size, contentType, kind, testDataConfirmed]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        size: { type: integer, minimum: 1, maximum: 20971520 }
+        contentType: { type: string }
+        kind: { type: string, enum: [audio, markdown] }
+        testDataConfirmed: { type: boolean }
+    HiringUpload:
+      type: object
+      required: [id, uploadUrl]
+      properties:
+        id: { type: string }
+        uploadUrl: { type: string }
     HealthStatus:
       type: object
       properties:
