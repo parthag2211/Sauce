@@ -119,6 +119,7 @@ export type Upload = {
   status: 'reserved' | 'ready' | 'failed';
   sha256: string;
   expiresAt?: string | null;
+  deletedAt?: string | null;
   consentVersion?: string | null;
   providerOutputHash?: string | null;
   sourceHash?: string | null;

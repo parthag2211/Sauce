@@ -35,7 +35,15 @@ export const GetHiringWorkspaceResponse = zod.object({
   "id": zod.string(),
   "revision": zod.number().int(),
   "data": zod.record(zod.string(), zod.unknown())
-}))
+})),
+  "deletionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "uploadId": zod.string(),
+  "state": zod.enum(['requested', 'processing', 'retrying', 'completed']),
+  "sauceDeleted": zod.boolean(),
+  "providerRetentionNote": zod.string(),
+  "errorCode": zod.string().optional()
+})).optional()
 })
 
 

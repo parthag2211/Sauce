@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { HiringRecord } from './hiringRecord';
+import type { RecordingDeletionRequest } from './recordingDeletionRequest';
 
 export interface HiringWorkspace {
   userId: string;
@@ -15,4 +16,5 @@ export interface HiringWorkspace {
   applicant: HiringRecord | null;
   opportunities: HiringRecord[];
   uploads: HiringRecord[];
+  deletionRequests?: RecordingDeletionRequest[];
 }

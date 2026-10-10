@@ -13,6 +13,25 @@ export interface HiringRecord {
   data: HiringRecordData;
 }
 
+export type RecordingDeletionRequestState = typeof RecordingDeletionRequestState[keyof typeof RecordingDeletionRequestState];
+
+
+export const RecordingDeletionRequestState = {
+  requested: 'requested',
+  processing: 'processing',
+  retrying: 'retrying',
+  completed: 'completed',
+} as const;
+
+export interface RecordingDeletionRequest {
+  id: string;
+  uploadId: string;
+  state: RecordingDeletionRequestState;
+  sauceDeleted: boolean;
+  providerRetentionNote: string;
+  errorCode?: string;
+}
+
 export interface HiringWorkspace {
   userId: string;
   mode: string;
@@ -21,6 +40,7 @@ export interface HiringWorkspace {
   applicant: HiringRecord | null;
   opportunities: HiringRecord[];
   uploads: HiringRecord[];
+  deletionRequests?: RecordingDeletionRequest[];
 }
 
 export type HiringCommandAction = typeof HiringCommandAction[keyof typeof HiringCommandAction];
@@ -93,25 +113,6 @@ export interface RecordingDeletionInput {
      * @maxLength 150
      */
   uploadId: string;
-}
-
-export type RecordingDeletionRequestState = typeof RecordingDeletionRequestState[keyof typeof RecordingDeletionRequestState];
-
-
-export const RecordingDeletionRequestState = {
-  requested: 'requested',
-  processing: 'processing',
-  retrying: 'retrying',
-  completed: 'completed',
-} as const;
-
-export interface RecordingDeletionRequest {
-  id: string;
-  uploadId: string;
-  state: RecordingDeletionRequestState;
-  sauceDeleted: boolean;
-  providerRetentionNote: string;
-  errorCode?: string;
 }
 
 export interface RecordingDeletionRequests {

@@ -8,7 +8,7 @@ import { reserveUpload, finalizeUpload, authorizedFile, inspectBytes } from "./l
 import { processVoiceJob } from "./lib/hiring-worker";
 import { ASR_OPTIONS, createElevenLabsTranscriber, normalizeAsr } from "./lib/hiring-transcriber";
 import { CONSENT_VERSION, redactExpiredEvidence, RETENTION_MS } from "./lib/hiring-privacy";
-import { expireRecordings } from "./lib/hiring-retention";
+import { expireRecordings, processDeletionRequest, requestRecordingDeletion, retryPendingDeletionRequests } from "./lib/hiring-retention";
 import { ObjectStorageService } from "./lib/objectStorage";
 
 const nonce = process.argv[2];
@@ -68,6 +68,7 @@ try {
   const jd = await upload(manager, Buffer.from("# Synthetic role\nCoordinate projects."), "markdown");
   const vision = await upload(manager, wav, "audio");
   const voice = await upload(applicant, wav, "audio");
+  const selfServeVoice = await upload(applicant, wav, "audio");
   ok(voice.data.sha256 && voice.data.durationSeconds === 1, "private upload hash and duration");
   ok(Math.abs(Date.parse(voice.data.expiresAt) - Date.now() - RETENTION_MS) < 10_000, "audio receives a 30-day expiry from reservation");
   ok(ASR_OPTIONS.model_id === "scribe_v2" && ASR_OPTIONS.no_verbatim === false && ASR_OPTIONS.timestamps_granularity === "word", "pinned verbatim Scribe model and word timestamps");
@@ -184,6 +185,46 @@ try {
     op = await command(manager, "setOutcome", { applicationId, status }, op);
     ok(op.data.applications[0].status === status, `outcome remains distinct: ${status}`);
   }
+  await pool.query("UPDATE hiring_uploads SET data=jsonb_set(jsonb_set(data,'{originalAsr}','\"Explicit applicant fixture transcript.\"'::jsonb),'{words}','[{\"text\":\"fixture\",\"start\":0,\"end\":0.5}]'::jsonb) WHERE id=$1", [selfServeVoice.id]);
+  const opWithDeletionEvidence = structuredClone((await get(op.id)).data);
+  opWithDeletionEvidence.applications[0].submittedAnswers.push({
+    artifactId: selfServeVoice.id, reviewedTranscript: "Explicit applicant fixture transcript.",
+    originalAsr: "Explicit applicant fixture transcript.", rawProviderOutput: { text: "fixture secret" },
+  });
+  await pool.query("UPDATE hiring_records SET data=$2,revision=revision+1 WHERE id=$1", [op.id, opWithDeletionEvidence]);
+  const deletionRequest = await requestRecordingDeletion(applicant, selfServeVoice.id);
+  await rejects(() => requestRecordingDeletion(outsider, selfServeVoice.id), "outsider cannot request deletion of another user's recording");
+  ok(deletionRequest.state === "requested" && deletionRequest.sauceDeleted === false &&
+    deletionRequest.providerRetentionNote.includes("separate"), "owner deletion request clearly distinguishes provider retention");
+  let simulatedDeleted = new Set<string>();
+  let failure: "before" | "between" | null = "before";
+  const flakyStore = async (path: string) => {
+      if (failure === "before") { failure = null; throw Error("simulated storage outage before deletion"); }
+      if (simulatedDeleted.has(path)) return;
+        if (failure === "between") { failure = null; throw Error("simulated storage outage between object deletes"); }
+        simulatedDeleted.add(path);
+  };
+  await rejects(() => processDeletionRequest(deletionRequest.id, flakyStore), "outage before object deletion is recorded");
+  let deletionState = (await pool.query("SELECT state,attempts FROM hiring_deletion_requests WHERE id=$1", [deletionRequest.id])).rows[0];
+  ok(deletionState.state === "retrying" && deletionState.attempts === 1, "failed cleanup remains visible and durable");
+  failure = "between";
+  await rejects(() => processDeletionRequest(deletionRequest.id, flakyStore), "partial object deletion failure is retryable");
+  deletionState = (await pool.query("SELECT state,attempts FROM hiring_deletion_requests WHERE id=$1", [deletionRequest.id])).rows[0];
+  ok(deletionState.state === "retrying" && deletionState.attempts === 2, "partial cleanup does not duplicate requests or scrub early");
+  ok((await pool.query("SELECT data FROM hiring_uploads WHERE id=$1", [selfServeVoice.id])).rows[0].data.originalAsr === "Explicit applicant fixture transcript.", "transcript stays available until all private copies are deleted");
+  const doneRequest = await processDeletionRequest(deletionRequest.id, flakyStore);
+  ok(doneRequest.state === "completed", "retry tolerates already-removed object and completes");
+  const deletedVoice = (await pool.query("SELECT data FROM hiring_uploads WHERE id=$1", [selfServeVoice.id])).rows[0].data;
+  ok(deletedVoice.deletedAt && !deletedVoice.originalAsr, "completed request removes source transcript");
+  const afterDeletion = await get(op.id);
+  const removedSnapshot = afterDeletion.data.applications[0].submittedAnswers.find((a: any) => a.artifactId === selfServeVoice.id);
+  ok(afterDeletion.data.applications[0].status === "hired" && afterDeletion.data.applications[0].outcomeHistory.at(-1).status === "hired" &&
+    !removedSnapshot.reviewedTranscript && !removedSnapshot.originalAsr && !removedSnapshot.rawProviderOutput, "deletion scrubs submitted copies and preserves manager outcome history");
+  const interruptedRequest = await requestRecordingDeletion(manager, vision.id);
+  await pool.query("UPDATE hiring_deletion_requests SET state='processing',updated_at=now()-interval '3 minutes' WHERE id=$1", [interruptedRequest.id]);
+  await retryPendingDeletionRequests();
+  const recoveredRequest = (await pool.query("SELECT state,attempts FROM hiring_deletion_requests WHERE id=$1", [interruptedRequest.id])).rows[0];
+  ok(recoveredRequest.state === "completed" && recoveredRequest.attempts === 1, "scheduled worker recovers deletion requests left processing by a server restart");
   const restarted = spawnSync(process.execPath, ["--import", "tsx", "src/hiring.test.ts", manager], { cwd: process.cwd(), encoding: "utf8", timeout: 20000 });
   assert.equal(restarted.status, 0, restarted.stderr);
   ok(true, "fresh process reads durable submitted snapshot and outcomes");
@@ -197,14 +238,17 @@ try {
   ok(!retainedAnswer.reviewedTranscript && !retainedAnswer.originalAsr && !retainedAnswer.rawProviderOutput && expiredOp.applications[0].status === "hired", "expiry scrubs submitted copies but keeps outcome history");
   process.stdout.write(`\n${checks} checks passed. All fixture data is synthetic.\n`);
 } finally {
-  const uploads = (await pool.query("SELECT object_path FROM hiring_uploads WHERE owner_id=ANY($1)", [actors])).rows;
+  const uploads = (await pool.query("SELECT object_path,data->>'stagingPath' AS staging_path FROM hiring_uploads WHERE owner_id=ANY($1)", [actors])).rows;
   const storage = new ObjectStorageService();
   for (const u of uploads) {
-    try { const file = await storage.getObjectEntityFile(u.object_path); await file.delete(); } catch { /* Already absent test object. */ }
+    for (const path of new Set([u.object_path, u.staging_path].filter(Boolean))) {
+      try { const file = await storage.getObjectEntityFile(path); await file.delete(); } catch { /* Already absent test object. */ }
+    }
   }
   await pool.query("DELETE FROM hiring_jobs WHERE upload_id IN (SELECT id FROM hiring_uploads WHERE owner_id=ANY($1))", [actors]);
   await pool.query("DELETE FROM hiring_uploads WHERE owner_id=ANY($1)", [actors]);
   await pool.query("DELETE FROM hiring_records WHERE owner_id=ANY($1)", [actors]);
   await pool.query("DELETE FROM hiring_requests WHERE owner_id=ANY($1)", [actors]);
+  await pool.query("DELETE FROM hiring_deletion_requests WHERE owner_id=ANY($1)", [actors]);
   await pool.end();
 }

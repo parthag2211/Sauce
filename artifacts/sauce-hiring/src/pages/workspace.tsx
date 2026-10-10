@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ConflictBanner, Empty, ErrorState, PageSkeleton, SectionTitle, TestModeBanner } from '@/components/kit';
 import {
@@ -16,10 +16,14 @@ import {
   type Organization,
   type Upload,
 } from '@/lib/hiring';
+import { getGetRecordingDeletionRequestsQueryKey, useGetRecordingDeletionRequests, useRequestRecordingDeletion } from '@workspace/api-client-react';
 
 export default function WorkspacePage() {
   const ws = useWorkspace();
   const cmd = useHiringCommand();
+  const deletionQuery = useGetRecordingDeletionRequests({ query: { queryKey: getGetRecordingDeletionRequestsQueryKey(), refetchInterval: 4000 } });
+  const deleteMutation = useRequestRecordingDeletion();
+  const deletionRequests = deletionQuery.data?.requests ?? [];
   const { toast } = useToast();
 
   if (ws.isLoading) return <PageSkeleton />;
@@ -40,6 +44,21 @@ export default function WorkspacePage() {
       toast({ title: 'Retry requested', description: 'The provider may still be unavailable.' });
     } catch (e) {
       toast({ title: 'Retry failed', description: errorMessage(e), variant: 'destructive' });
+    }
+  }
+
+  async function requestDeletion(id: string) {
+    const confirmed = window.confirm(
+      'Request deletion of this recording and transcript copies from Sauce? This does not erase ElevenLabs provider logs or backups under its standard retention policy.',
+    );
+    if (!confirmed) return;
+    try {
+      await deleteMutation.mutateAsync({ data: { uploadId: id } });
+      await ws.refetch();
+      await deletionQuery.refetch();
+      toast({ title: 'Deletion request submitted', description: 'Sauce deletion status is shown here. ElevenLabs retention is separate.' });
+    } catch (e) {
+      toast({ title: 'Deletion request failed', description: errorMessage(e), variant: 'destructive' });
     }
   }
 
@@ -133,13 +152,29 @@ export default function WorkspacePage() {
                       <span className={`chip ${u.data.status === 'failed' ? 'chip-orange' : u.data.status === 'ready' ? 'chip-mint' : ''}`}>{u.data.status}</span>
                     </div>
                     {u.data.kind === 'audio' && (
-                      <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-[var(--muted-ink)]">
+                      <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--muted-ink)]">
                         <span>{fmtDuration(u.data.durationSeconds)} {PROCESSING_LABEL[u.data.processingState] ?? u.data.processingState}{isProcessing(u.data) && '...'}</span>
-                        {(u.data.processingState === 'failed' || u.data.processingState === 'unavailable') && (
-                          <button type="button" className="inline-flex items-center gap-1 font-bold text-[var(--ink)] disabled:opacity-40" disabled={!!cmd.pendingAction} onClick={() => retry(u.id, u.revision)} data-testid={`button-retry-transcription-${u.id}`}><RotateCcw size={11} /> Retry</button>
-                        )}
+                        <div className="flex items-center gap-3">
+                          {(u.data.processingState === 'failed' || u.data.processingState === 'unavailable') && (
+                            <button type="button" className="inline-flex items-center gap-1 font-bold text-[var(--ink)] disabled:opacity-40" disabled={!!cmd.pendingAction} onClick={() => retry(u.id, u.revision)} data-testid={`button-retry-transcription-${u.id}`}><RotateCcw size={11} /> Retry</button>
+                          )}
+                          {u.data.deletedAt ? <span className="font-semibold">Deleted from Sauce</span> : (
+                            <button type="button" className="inline-flex items-center gap-1 font-bold text-[var(--orange)] disabled:opacity-40" disabled={deleteMutation.isPending} onClick={() => requestDeletion(u.id)} data-testid={`button-delete-recording-${u.id}`}><Trash2 size={11} /> Request deletion</button>
+                          )}
+                        </div>
                       </div>
                     )}
+                    {u.data.kind === 'audio' && <p className="mt-1 text-[10px] text-[var(--muted-ink)]">
+                      {deletionRequests.find((r) => r.uploadId === u.id)?.state === 'completed'
+                        ? 'Sauce deleted the recording and stored transcript copies. ElevenLabs provider logs or backups may remain under its standard retention.'
+                        : deletionRequests.find((r) => r.uploadId === u.id)?.state === 'retrying'
+                          ? 'Deletion is waiting for storage recovery. Sauce will retry automatically.'
+                          : deletionRequests.find((r) => r.uploadId === u.id)?.state === 'processing'
+                            ? 'Sauce is deleting this recording and its transcript copies…'
+                            : deletionRequests.find((r) => r.uploadId === u.id)?.state === 'requested'
+                              ? 'Deletion request received. Sauce will remove the recording and transcript copies; provider retention is separate.'
+                              : null}
+                    </p>}
                   </li>
                 ))}
               </ul>
