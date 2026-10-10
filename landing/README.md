@@ -15,6 +15,20 @@ npm start
 
 Open http://localhost:3000. Set `PORT` to use another port. `GET /health` returns a health response.
 
+## Preview on Replit
+
+The Replit environment uses Node.js 22. Click **Run** to start the
+**Sauce walkthrough** workflow and open Preview. From the repository root, the
+equivalent command is:
+
+```sh
+PORT=5000 npm --prefix landing start
+```
+
+The server binds to `0.0.0.0:5000`; no dependency installation or secrets are
+required. This previews the existing illustrative walkthrough, not a working
+hiring backend. The repository layout and Railway deployment are unchanged.
+
 ## Deploy to Railway
 
 Project: `amberintelligence` (`758c0c59-8ac7-4cbd-9b29-f67075de8e72`). Environment: `production`. Service: `sauce-vision` (`046d10cf-4098-4519-85b8-ce096af8be00`). The existing `amber-website` and `amber-id` services are separate.
