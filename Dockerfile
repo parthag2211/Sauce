@@ -4,6 +4,7 @@ ENV NODE_ENV=production
 ENV PORT=8080
 COPY package.json server.mjs ./
 COPY public ./public
+COPY backend ./backend
 USER node
 EXPOSE 8080
 CMD ["node", "server.mjs"]

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f34f35"><title>Sauce | Working demo</title>
+  <link rel="icon" href="./logo.svg" type="image/svg+xml"><link rel="stylesheet" href="./working.css">
+  <script type="module" src="./working.js"></script>
+</head>
+<body>
+  <a class="skip" href="#demo-main">Skip to content</a>
+  <header class="live-header"><a class="live-brand" href="/"><img src="/logo.svg" alt="" width="42" height="42">Sauce</a><div class="live-header-actions"><a class="live-button outline" href="/">Product walkthrough</a><button class="live-button outline" id="logout" hidden>Lock demo</button></div></header>
+  <main id="demo-main" tabindex="-1"><section class="login-panel"><span class="pill peach">Working demo</span><h1>Evidence.<br>Then decisions.</h1><form id="login-form"><label for="password">Demo password</label><div class="login-row"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="100"><button class="live-button" type="submit">Unlock demo</button></div></form><p id="login-status" role="status" aria-live="polite"></p></section></main>
+  <dialog id="evidence-dialog" aria-labelledby="evidence-title"></dialog>
+  <div id="live-status" role="status" aria-live="polite"></div>
+</body>
+</html>
