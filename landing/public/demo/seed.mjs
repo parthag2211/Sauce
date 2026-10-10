@@ -1,0 +1,33 @@
+export const roleSource = 'https://www.mckinsey.com/careers/search-jobs/jobs/businessanalyst-15136';
+export const organizationMarkdown = `# McKinsey & Company\n\nDemo context: a management consulting firm.\nTeam: client service / generalist consulting.\nWork: understand client problems, analyze evidence, and develop useful recommendations with a team.\n\nThis is Sauce's illustrative context, not an internal McKinsey document.\nPublic reference: ${roleSource}`;
+export const jobMarkdown = `# Business Analyst — undergraduate entry\n\nIllustrative opening for this Sauce demo.\nTeam: client service / generalist consulting.\nSeniority: undergraduate entry level.\n\n## Current requirements\n- Break an ambiguous business problem into testable questions.\n- Analyze data and explain the limitations of a recommendation.\n- Communicate a structured recommendation to a client team.\n- Own a workstream and incorporate feedback.\n\nRole context is informed by McKinsey's public Business Analyst listing. Office-specific eligibility is not modeled.\nSource: ${roleSource}`;
+export const visionText = 'I want someone who can make progress without perfect information. Show me how you structure a problem, use evidence, and change your mind when a teammate spots something you missed. Undergraduate projects count; a consulting internship is not the only way to demonstrate the work.';
+export const questions = [
+  { id: 'q-problem', text: 'Tell us about an ambiguous problem you broke into smaller questions. What did you test first, and why?', responseMode: 'voice' },
+  { id: 'q-evidence', text: 'Describe a recommendation you made using data. What was uncertain, and how did you check your conclusion?', responseMode: 'voice' },
+  { id: 'q-team', text: 'Tell us about feedback that changed your approach on a team. What did you do differently?', responseMode: 'voice' },
+];
+export const sampleAnswers = [
+  'Our student food cooperative was losing money. I separated pricing, waste, and demand into three questions. I tested waste first because we could weigh unsold food that week. After two weeks of measurement, we changed ordering quantities and tracked whether waste fell without running out of popular items.',
+  'In a class project, I recommended consolidating delivery routes. I compared cost per order across several route designs. Our data did not include holiday demand, so I tested higher-volume scenarios and proposed a small pilot before changing the entire system.',
+  'A teammate pointed out that our survey missed students who worked evenings. I paused the recommendation, recruited additional respondents, and revised the conclusion. I explained the change to the team and documented the limits so we would not overstate our findings.',
+];
+export const credentialMarkdown = '# Alex Morgan\n\n## Education\nUndergraduate degree in Economics, expected 2027.\n\n## Experience\nStudent food cooperative: led a waste-measurement and ordering project.\nCourse consulting project: modeled delivery routes and presented a pilot recommendation.\n\nAll experience in this example is fictional.';
+export const proposalMarkdown = '# Work proposal\n\nI am seeking a full-time, entry-level business analyst role after graduation. I want to work on ambiguous business problems, combine research with quantitative analysis, and learn through client-facing team projects. Open to travel and discussing office placement.';
+export const historicalPool = [
+  { id: 'hist-1', name: 'Jordan Lee', resume: 'Fictional résumé: campus operations project; data analysis; documented recommendation.', characteristics: ['Problem structuring', 'Evidence-based reasoning'], outcomeHistory: [{ stage: 'shortlisted' }, { stage: 'offered' }, { stage: 'accepted' }, { stage: 'hired' }], source: 'demo-pool.json · row 1' },
+  { id: 'hist-2', name: 'Casey Taylor', resume: 'Fictional résumé: research project; sensitivity analysis; team presentation.', characteristics: ['Evidence-based reasoning', 'Team collaboration'], outcomeHistory: [{ stage: 'shortlisted' }, { stage: 'offered' }, { stage: 'accepted' }], source: 'demo-pool.json · row 2' },
+  { id: 'hist-3', name: 'Riley Chen', resume: 'Fictional résumé: student venture; customer interviews; problem decomposition.', characteristics: ['Problem structuring', 'Team collaboration'], outcomeHistory: [{ stage: 'shortlisted' }, { stage: 'offered' }], source: 'demo-pool.json · row 3' },
+  { id: 'hist-4', name: 'Sam Rivera', resume: 'Fictional résumé: campus project; problem decomposition.', characteristics: ['Problem structuring'], outcomeHistory: [{ stage: 'shortlisted' }], source: 'demo-pool.json · row 4' },
+  { id: 'hist-5', name: 'Drew Ellis', resume: 'Fictional résumé: team presentation; project participation.', characteristics: ['Team collaboration'], outcomeHistory: [{ stage: 'reviewed' }], source: 'demo-pool.json · row 5' },
+  { id: 'hist-6', name: 'Quinn Blake', resume: 'Fictional résumé: coursework; no detailed project evidence supplied.', characteristics: [], outcomeHistory: [{ stage: 'reviewed' }], source: 'demo-pool.json · row 6' },
+];
+export function makeSeed() {
+  return {
+    schemaVersion: 'sauce-demo-1',
+    organizations: [{ id: 'org-mckinsey-demo', name: 'McKinsey & Company', organizationMarkdown: '', teams: ['Client service / generalist consulting'], hiringManagerIds: ['manager-demo'], opportunityIds: ['opportunity-ba-demo'] }],
+    hiringManagers: [{ id: 'manager-demo', name: '', organizationId: 'org-mckinsey-demo', opportunityIds: ['opportunity-ba-demo'], onboarded: false }],
+    applicants: [{ id: 'applicant-demo', name: '', credentials: '', workProposal: '', contactInformation: { email: '', linkedin: '', phone: '' }, references: [], opportunityIds: [], onboarded: false }],
+    opportunities: [{ id: 'opportunity-ba-demo', organizationId: 'org-mckinsey-demo', hiringManagerId: 'manager-demo', title: 'Business Analyst', team: 'Client service / generalist consulting', seniority: 'Undergraduate entry level', jobDescription: '', managerVision: { originalTranscript: '', reviewedTranscript: '', audio: null, isSample: false }, status: 'draft', questions: { forApplicants: structuredClone(questions), fromApplicants: [] }, scoring: { weights: { composite_profile: null, voice_transcript: null, voice_behaviors: null }, criteria: ['Problem structuring', 'Evidence-based reasoning', 'Team collaboration'], managerApproved: false, version: 0 }, applications: [], history: { previousApplicants: [], importPreview: null, patterns: [], employeeInterviews: [], managerInterviews: [], hiringSummary: [], policyRevisions: [], research: null, nextCycleSuggestions: [] } }],
+  };
+}

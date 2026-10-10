@@ -22,7 +22,7 @@ Historical imports, interviews, suggested patterns and a hiring summary are opti
 
 ## Current implementation
 
-This repository contains design documents and an [illustrative landing page](https://sauce-vision-production.up.railway.app). The landing page explains earlier vision details; the four-object architecture above is the current design contract. There is no working hiring backend, submission frontend, deployed Sauce MCP endpoint or trained scoring model yet.
+Try the [compact two-role demo](https://sauce-vision-production.up.railway.app/demo): managers post jobs and review applicants; applicants edit their profile and find roles with three voice questions. Its text and audio are saved only in the same browser. People and scores are fictional. See the [prototype team handoff](docs/PROTOTYPE_HANDOFF.md). There is no production hiring backend, live transcription, deployed Sauce MCP endpoint or trained scoring model yet. The simple demo is also the site homepage; the original team vision remains at `/vision`.
 
 Danish uses Replit. ElevenLabs is an available transcription candidate; Chewbacca is a source for scoped import/history functionality. Neither runtime integration is implemented. See [technical details](backend-architecture/README.md) and [landing deployment instructions](landing/README.md).
 
