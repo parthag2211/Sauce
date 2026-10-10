@@ -85,7 +85,7 @@ export default function OpportunityPage() {
           <section>
             <SectionTitle eyebrow="Manager vision" title={<>In the manager's <em>own words</em></>} />
             <AudioPlayer artifactId={d.managerVision.artifactId} label="Play vision" />
-            <p className="mt-2 text-[11px] text-[var(--muted-ink)]">No automatic transcript: transcription provider not yet enabled.</p>
+            <p className="mt-2 text-[11px] text-[var(--muted-ink)]">No automatic transcript is available for this recording.</p>
           </section>
 
           {isManager && d.status === 'draft' && <PublishPanel ctx={ctx} />}
@@ -180,7 +180,7 @@ function ApplicantPanel({ ctx, app, hasProfile, uploads }: { ctx: Ctx; app?: App
     <section>
       <SectionTitle eyebrow="Your application · draft" title={<>Answer <em>out loud</em></>} />
       <div className="mb-6 rounded-md border border-[#b6c2df] bg-[#e7ecf6] p-4 text-[12px] leading-relaxed text-[#2f4170]">
-        Automatic transcription is not enabled until provider consent is configured, so it will usually show as unavailable. Your recording is stored as a real file. Listen back and type what you said: that becomes your manually reviewed transcript, labeled as such. Nothing is ever filled in for you.
+        With your consent, ElevenLabs transcribes your saved recording. Listen back and review the original transcript, or type what you said if transcription fails. Your reviewed text stays separate and is never overwritten by automatic results. Recordings and transcript copies expire 30 days after upload.
       </div>
       <div className="space-y-10">
         {questions.map((q, i) => (

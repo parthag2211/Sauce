@@ -4,7 +4,7 @@ All API requests use cookie authentication under `/api/hiring`. This shared API 
 
 `HiringRecord` is `{id, revision, data}`. Generated `data` is a JSON object; define frontend view types as needed matching these shapes. All text is plain text, never rendered as raw HTML.
 
-GET workspace returns userId, mode ("internal_test"), owned organizations/hiringManagers, own applicant or null, visible opportunities (published or owned), and own uploads. Opportunity data is role-filtered: managers see only submitted applications, applicants see only their own. Never display fabricated counts or samples as real.
+GET workspace returns userId, mode ("live_transcription"), owned organizations/hiringManagers, own applicant or null, visible opportunities (published or owned), and own uploads. Opportunity data is role-filtered: managers see only submitted applications, applicants see only their own. Never display fabricated counts or samples as real.
 
 ## Data shapes
 - Organization data: name, markdownArtifactId, organizationMarkdown, hiringManagerIds.
@@ -32,7 +32,6 @@ POST commands takes `{action,idempotencyKey:crypto.randomUUID(),targetId?,expect
 - retryTranscription: targetId upload ID; payload `{}`. Only owner and failed/unavailable state; provider may remain unavailable.
 
 ## Uploads and voice
-Use requestHiringUpload({data:{name,size,contentType,kind,testDataConfirmed:true}}), PUT raw file bytes to returned uploadUrl, then finalizeHiringUpload({id}). Poll workspace every 3 seconds while processing. Fetch authorized playback via `/api/hiring/uploads/{id}`; use Blob URL for audio if necessary.
-Only synthetic/internal test data is allowed; require explicit checkbox before upload. Explain live provider is not yet enabled, automatic transcription may show unavailable, and recordings remain actual durable files. Do not fake a successful transcript. Recording controls use MediaRecorder and handle permission errors, playback, stop, cancel and retakes. Maximum 20 MiB and 180 seconds. Markdown/text maximum 256 KiB. Supported audio webm/ogg/mp3/wav/m4a, verified by backend. Markdown is UTF-8 .md/.txt only; no PDF/DOCX claims.
+Use requestHiringUpload({data:{name,size,contentType,kind,transcriptionConsent:true,consentVersion:"transcription-standard-30d-v1"}} for audio), PUT raw file bytes to returned uploadUrl, then finalizeHiringUpload({id}). Audio upload requires this explicit consent or the synthetic-data fixture gate; only consented audio is sent to ElevenLabs. Explain transcription-only use, standard ElevenLabs retention (provider logs/backups may last longer than 30 days), Sauce's 30-day audio/transcript deletion, and how to request deletion before audio upload. Poll workspace every 3 seconds while processing. Fetch authorized playback via `/api/hiring/uploads/{id}`; use Blob URL for audio if necessary. Preserve original text and word timings separately from manual reviewed text. Never infer sentiment, emotion, or numerical scores. Recording controls use MediaRecorder and handle permission errors, playback, stop, cancel and retakes. Maximum 20 MiB and 180 seconds. Markdown/text maximum 256 KiB. Supported audio webm/ogg/mp3/wav/m4a, verified by backend. Markdown is UTF-8 .md/.txt only; no PDF/DOCX claims.
 
 Routes: public `/`, `/sign-in/*?`, `/sign-up/*?`; authenticated `/workspace`, `/profile`, `/opportunities/new`, `/opportunities/:id`. Opportunity route includes apply/review/inquiries according to server-provided permissions. Organization creation can be in workspace/new opportunity flow. Do not alter walkthrough files.

@@ -1,2 +1,2 @@
 - [Walkthrough preservation](walkthrough-preservation.md) — Keep the illustrative Sauce walkthrough separate from the functional hiring app.
-- [Hiring release boundary](hiring-release-boundary.md) — Internal tests only until provider/privacy and scoring approvals; no invented ASR or ratings.
+- [Hiring release approvals](hiring-release-boundary.md) — Transcript-only ASR and disclosed standard provider retention are approved; numeric scoring remains blocked.

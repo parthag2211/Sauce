@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { redactExpiredEvidence } from "./hiring-privacy";
 
 export class DomainError extends Error {
   constructor(public status: number, public code: string) { super(code); }
@@ -28,7 +29,7 @@ export const payloadSchemas = {
 };
 export type RecordRow = { id: string; owner_id: string; kind: string; revision: number; data: any };
 export function visibleRecord(row: RecordRow, actor: string) {
-  const data = structuredClone(row.data);
+  const data = redactExpiredEvidence(row.data);
   if (row.kind === "Opportunity") {
     insist(row.owner_id === actor || data.status === "published", "not_found", 404);
     const manager = row.owner_id === actor;

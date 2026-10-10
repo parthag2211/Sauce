@@ -5,6 +5,7 @@ import { RunHiringCommandBody, RequestHiringUploadBody } from "@workspace/api-zo
 import { DomainError, insist, visibleRecord } from "../lib/hiring-model";
 import { executeCommand } from "../lib/hiring-service";
 import { reserveUpload, finalizeUpload, authorizedFile } from "../lib/hiring-files";
+import { redactExpiredEvidence } from "../lib/hiring-privacy";
 
 const router = Router();
 router.use((req, res, next) => {
@@ -23,7 +24,7 @@ router.get("/workspace", async (req, res) => {
   const records = (await pool.query("SELECT * FROM hiring_records WHERE owner_id=$1 OR (kind='Opportunity' AND data->>'status'='published') ORDER BY created_at DESC LIMIT 500", [actor])).rows;
   const uploads = (await pool.query("SELECT id,revision,data FROM hiring_uploads WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 300", [actor])).rows;
   const ofKind = (kind: string) => records.filter(r => r.kind === kind && r.owner_id === actor).map(r => visibleRecord(r, actor));
-  res.json({ userId: actor, mode: "internal_test", organizations: ofKind("Organization"), hiringManagers: ofKind("HiringManager"), applicant: ofKind("Applicant")[0] || null, opportunities: records.filter(r => r.kind === "Opportunity").map(r => visibleRecord(r, actor)), uploads });
+  res.json({ userId: actor, mode: "live_transcription", organizations: ofKind("Organization"), hiringManagers: ofKind("HiringManager"), applicant: ofKind("Applicant")[0] || null, opportunities: records.filter(r => r.kind === "Opportunity").map(r => visibleRecord(r, actor)), uploads: redactExpiredEvidence(uploads) });
 });
 router.get("/opportunities/:id", async (req, res) => {
   const row = (await pool.query("SELECT * FROM hiring_records WHERE id=$1 AND kind='Opportunity'", [req.params.id])).rows[0];

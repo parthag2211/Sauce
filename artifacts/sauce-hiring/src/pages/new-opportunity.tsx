@@ -96,7 +96,7 @@ export default function NewOpportunityPage() {
         </Step>
 
         <Step n="03" title="Your vision, by voice">
-          <p className="mb-3 text-[13px] text-[var(--muted-ink)]">Up to three minutes on why this role exists and what good looks like. Automatic transcription is not enabled yet; the recording itself is what applicants hear.</p>
+          <p className="mb-3 text-[13px] text-[var(--muted-ink)]">Up to three minutes on why this role exists and what good looks like. With your consent, ElevenLabs transcribes the recording. Applicants can hear it for 30 days after upload.</p>
           {vision ? (
             <div className="space-y-3">
               <AudioPlayer artifactId={vision.id} label="Your vision" />

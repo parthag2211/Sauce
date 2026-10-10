@@ -22,7 +22,7 @@ export default function Landing() {
 
       <section className="mx-auto grid w-[min(1200px,calc(100%-40px))] items-center gap-10 py-16 md:grid-cols-2 md:py-24">
         <div className="rise">
-          <p className="eyebrow"><span className="dot mr-2 align-[2px]" />Hiring, by voice · internal test</p>
+          <p className="eyebrow"><span className="dot mr-2 align-[2px]" />Hiring, by voice · human reviewed</p>
           <h1 className="mt-6 text-[52px] md:text-[78px]">The job, <em>said plainly.</em> The answer, in their voice.</h1>
           <p className="mt-6 max-w-[440px] text-[16px] leading-[1.75] text-[var(--muted-ink)]">
             Managers and applicants share real evidence: written context, spoken vision, recorded answers with transcripts they have checked. No opaque score decides for anyone.
@@ -86,8 +86,8 @@ export default function Landing() {
           </div>
           <ul className="space-y-6 text-[14px] leading-[1.8] text-[#d3ddcd]">
             <li><b className="text-[#f7f4e9]">No scores yet.</b> Scoring weights and criteria have not been configured or approved. Every assessment shows exactly that, and nothing is ranked.</li>
-            <li><b className="text-[#f7f4e9]">No fake transcription.</b> Automatic transcription is not enabled until provider consent is configured. Recordings are stored as real files and transcripts are typed and checked by the speaker, labeled as manual review.</li>
-            <li><b className="text-[#f7f4e9]">Test data only.</b> This is an internal test environment. Every upload asks you to confirm it is synthetic.</li>
+            <li><b className="text-[#f7f4e9]">Reviewed transcription.</b> With your consent, ElevenLabs transcribes saved recordings. You check and correct the text; manual review remains available if transcription fails. No sentiment or emotion inference.</li>
+            <li><b className="text-[#f7f4e9]">Recording privacy.</b> Sauce removes recordings and transcript copies, including submitted copies, 30 days after upload. ElevenLabs uses its <a href="https://elevenlabs.io/privacy-policy" className="underline" target="_blank" rel="noreferrer">standard retention terms</a>; provider logs and backups may remain longer. Email <a className="underline" href="mailto:klvstc@gmail.com">klvstc@gmail.com</a> to request deletion.</li>
           </ul>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function Landing() {
       </section>
       <footer className="mx-auto flex w-[min(1200px,calc(100%-40px))] flex-wrap items-center justify-between gap-4 py-8 text-[10px] text-[var(--muted-ink)]">
         <Brand size={22} />
-        <span>Internal test environment. Synthetic data only.</span>
+        <span>Voice transcription is optional. Applicants review all transcript text.</span>
       </footer>
     </div>
   );

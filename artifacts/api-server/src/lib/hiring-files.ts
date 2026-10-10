@@ -7,12 +7,15 @@ import { promisify } from "node:util";
 import { pool } from "@workspace/db";
 import { ObjectStorageService, objectStorageClient } from "./objectStorage";
 import { insist } from "./hiring-model";
+import { CONSENT_VERSION, RETENTION_MS, isExpired } from "./hiring-privacy";
 
 const storage = new ObjectStorageService();
 const exec = promisify(execFile);
 const media = new Set(["audio/webm", "audio/ogg", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp4", "audio/x-m4a"]);
 export async function reserveUpload(actor: string, input: any) {
-  insist(input.testDataConfirmed === true, "internal_test_data_confirmation_required");
+  const consentGiven = input.transcriptionConsent === true && input.consentVersion === CONSENT_VERSION;
+  const liveConsent = input.kind === "audio" && consentGiven;
+  insist(consentGiven || input.testDataConfirmed === true, "transcription_consent_required");
   const mime = input.contentType.split(";")[0].trim();
   insist(input.kind === "audio" ? media.has(mime) : ["text/plain", "text/markdown"].includes(mime), "unsupported_content_type");
   insist(input.size <= (input.kind === "audio" ? 20 * 1024 * 1024 : 256 * 1024), "file_too_large");
@@ -23,7 +26,11 @@ export async function reserveUpload(actor: string, input: any) {
   const id = randomUUID();
   await pool.query("INSERT INTO hiring_uploads(id,owner_id,object_path,data) VALUES($1,$2,$3,$4)", [
     id, actor, storage.normalizeObjectEntityPath(uploadUrl),
-    { ...input, contentType: mime, status: "reserved", processingState: "not_requested", originalAsr: null, words: [], provider: null },
+    { ...input, consentVersion: liveConsent ? CONSENT_VERSION : null,
+      consentedAt: liveConsent ? new Date().toISOString() : null,
+      expiresAt: input.kind === "audio" ? new Date(Date.now() + RETENTION_MS).toISOString() : null,
+      stagingPath: storage.normalizeObjectEntityPath(uploadUrl),
+      contentType: mime, status: "reserved", processingState: "not_requested", originalAsr: null, words: [], provider: null },
   ]);
   return { id, uploadUrl };
 }
@@ -59,6 +66,7 @@ export async function finalizeUpload(actor: string, id: string) {
     await c.query("BEGIN");
     const row = (await c.query("SELECT * FROM hiring_uploads WHERE id=$1 AND owner_id=$2 FOR UPDATE", [id, actor])).rows[0];
     insist(row, "not_found", 404);
+    insist(!isExpired(row.data), "retention_expired", 410);
     if (row.data.status === "ready") { await c.query("COMMIT"); return { id, revision: row.revision, data: row.data }; }
     const source = await storage.getObjectEntityFile(row.object_path);
     const [metadata] = await source.getMetadata();
@@ -84,6 +92,7 @@ export async function finalizeUpload(actor: string, id: string) {
 export async function authorizedFile(actor: string, id: string) {
   const row = (await pool.query("SELECT * FROM hiring_uploads WHERE id=$1", [id])).rows[0];
   insist(row?.data.status === "ready", "not_found", 404);
+  insist(!isExpired(row.data), "retention_expired", 410);
   let allowed = row.owner_id === actor;
   if (!allowed) {
     // Publishing explicitly shares the manager's vision with authenticated applicants.

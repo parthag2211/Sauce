@@ -1,6 +1,7 @@
 import { randomUUID, createHash } from "node:crypto";
 import { pool } from "@workspace/db";
 import { DomainError, insist, payloadSchemas, visibleRecord, assessment, type RecordRow } from "./hiring-model";
+import { isExpired, redactExpiredEvidence } from "./hiring-privacy";
 
 const uid = () => randomUUID();
 const now = () => new Date().toISOString();
@@ -20,7 +21,7 @@ export async function executeCommand(actor: string, command: any) {
     if (prior.rows[0]) {
       insist(prior.rows[0].digest === digest, "idempotency_conflict", 409);
       await c.query("COMMIT");
-      return prior.rows[0].result;
+      return redactExpiredEvidence(prior.rows[0].result);
     }
     const get = async (id: string, kind?: string): Promise<RecordRow> => {
       const r = (await c.query("SELECT * FROM hiring_records WHERE id=$1", [id])).rows[0];
@@ -30,6 +31,7 @@ export async function executeCommand(actor: string, command: any) {
     const ownedUpload = async (id: string, kind?: string) => {
       const r = (await c.query("SELECT * FROM hiring_uploads WHERE id=$1 AND owner_id=$2", [id, actor])).rows[0];
       insist(r && r.data.status === "ready" && (!kind || r.data.kind === kind), "artifact_not_ready_or_forbidden", 403);
+      insist(!isExpired(r.data), "retention_expired", 410);
       return r;
     };
     const create = async (kind: string, data: any): Promise<RecordRow> => {
@@ -101,9 +103,9 @@ export async function executeCommand(actor: string, command: any) {
           requireDraft();
           insist(d.status === "published", "opportunity_not_open");
           insist(d.questions.forApplicants.some((q: any) => q.id === p.questionId), "question_not_found");
-          await ownedUpload(p.artifactId, "audio");
+          const recording = await ownedUpload(p.artifactId, "audio");
           insist(application.voiceAnswers.length < 30, "take_limit_exceeded");
-          application.voiceAnswers.push({ id: uid(), questionId: p.questionId, artifactId: p.artifactId, reviewedTranscript: null, reviewedAt: null, selected: false });
+          application.voiceAnswers.push({ id: uid(), questionId: p.questionId, artifactId: p.artifactId, expiresAt: recording.data.expiresAt, reviewedTranscript: null, reviewedAt: null, selected: false });
           break;
         case "reviewTake": {
           requireDraft();
@@ -122,7 +124,7 @@ export async function executeCommand(actor: string, command: any) {
             insist(selected.length === 1 && selected[0].reviewedAt && selected[0].reviewedTranscript?.trim(), "missing_reviewed_voice_answer");
             const u = await ownedUpload(selected[0].artifactId, "audio");
             insist(!["queued", "processing"].includes(u.data.processingState), "processing_pending", 409);
-            answers.push({ ...selected[0], originalAsr: u.data.originalAsr, words: u.data.words || [], sha256: u.data.sha256, durationSeconds: u.data.durationSeconds, provider: u.data.provider, processingState: u.data.processingState });
+            answers.push({ ...selected[0], originalAsr: u.data.originalAsr, words: u.data.words || [], sha256: u.data.sha256, durationSeconds: u.data.durationSeconds, provider: u.data.provider, model: u.data.model, sourceHash: u.data.sourceHash, providerOutputHash: u.data.providerOutputHash, rawProviderOutput: u.data.rawProviderOutput, options: u.data.options, expiresAt: u.data.expiresAt, processingState: u.data.processingState });
           }
           application.submittedProfile = structuredClone(profile.data);
           application.profileRevision = profile.revision;
@@ -157,7 +159,7 @@ export async function executeCommand(actor: string, command: any) {
     }
     await c.query("INSERT INTO hiring_requests(id,owner_id,request_key,digest,result) VALUES($1,$2,$3,$4,$5)", [uid(), actor, command.idempotencyKey, digest, result]);
     await c.query("COMMIT");
-    return result;
+    return redactExpiredEvidence(result);
   } catch (e) {
     await c.query("ROLLBACK"); throw e;
   } finally { c.release(); }

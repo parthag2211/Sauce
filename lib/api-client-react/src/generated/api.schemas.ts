@@ -77,7 +77,9 @@ export interface HiringUploadInput {
   size: number;
   contentType: string;
   kind: HiringUploadInputKind;
-  testDataConfirmed: boolean;
+  testDataConfirmed?: boolean;
+  consentVersion?: string;
+  transcriptionConsent?: boolean;
 }
 
 export interface HiringUpload {

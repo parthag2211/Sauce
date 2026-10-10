@@ -82,7 +82,9 @@ export const RequestHiringUploadBody = zod.object({
   "size": zod.number().int().min(1).max(requestHiringUploadBodySizeMax),
   "contentType": zod.string(),
   "kind": zod.enum(['audio', 'markdown']),
-  "testDataConfirmed": zod.boolean()
+  "testDataConfirmed": zod.boolean().optional(),
+  "consentVersion": zod.string().optional(),
+  "transcriptionConsent": zod.boolean().optional()
 })
 
 export const RequestHiringUploadResponse = zod.object({

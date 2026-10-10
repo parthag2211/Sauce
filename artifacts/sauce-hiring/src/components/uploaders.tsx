@@ -15,11 +15,13 @@ import {
 } from '@/lib/hiring';
 import { WaveMark } from '@/components/kit';
 
-export function TestDataConsent({ checked, onChange, id }: { checked: boolean; onChange: (v: boolean) => void; id: string }) {
+export function TestDataConsent({ checked, onChange, id, audio = false }: { checked: boolean; onChange: (v: boolean) => void; id: string; audio?: boolean }) {
   return (
     <label htmlFor={id} className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e6ae9c] bg-[#fdf1ea] p-3 text-[12px] leading-snug">
       <input id={id} type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--orange)]" checked={checked} onChange={(e) => onChange(e.target.checked)} data-testid={`checkbox-test-data-${id}`} />
-      <span>I confirm this file is synthetic, internal test data. It contains no real candidate or personal information.</span>
+      {audio ? (
+        <span>I have permission to upload this recording. I agree it is sent to ElevenLabs for transcription only—not sentiment analysis or scoring. Sauce deletes the recording and transcript copies, including submitted copies, 30 days after upload. ElevenLabs uses its standard retention terms; provider logs and backups may remain longer. Request deletion at <a className="underline" href="mailto:klvstc@gmail.com">klvstc@gmail.com</a>. <a className="underline" href="https://elevenlabs.io/privacy-policy" target="_blank" rel="noreferrer">ElevenLabs privacy policy</a>.</span>
+      ) : <span>I have permission to upload this document. It is stored privately by Sauce and is not sent to ElevenLabs. <a className="underline" href="mailto:klvstc@gmail.com">Email us</a> with a deletion request.</span>}
     </label>
   );
 }
@@ -65,10 +67,10 @@ export function TextFileUpload({ id, label, hint, onUploaded, uploaded }: {
   }
 
   async function send() {
-    if (!file) return;
+    if (!file || !consent) return;
     const ext = file.name.split('.').pop()?.toLowerCase();
     try {
-      const rec = await upload(file, { name: file.name, kind: 'markdown', contentType: ext === 'md' ? 'text/markdown' : 'text/plain' });
+      const rec = await upload(file, { name: file.name, kind: 'markdown', contentType: ext === 'md' ? 'text/markdown' : 'text/plain', consent });
       onUploaded(rec, text);
       setFile(null);
     } catch { /* surfaced via phase */ }
@@ -209,10 +211,10 @@ export function AudioCapture({ id, cta = 'Save this take', onUploaded }: { id: s
   }
 
   async function send() {
-    if (!clip) return;
+    if (!clip || !consent) return;
     if (clip.blob.size > AUDIO_MAX_BYTES) return setRecError('Recording is larger than 20 MiB.');
     try {
-      const rec = await upload(clip.blob, { name: clip.name, kind: 'audio', contentType: clip.type });
+      const rec = await upload(clip.blob, { name: clip.name, kind: 'audio', contentType: clip.type, consent });
       await onUploaded(rec);
       setClip(null);
       setState('idle');
@@ -258,7 +260,7 @@ export function AudioCapture({ id, cta = 'Save this take', onUploaded }: { id: s
             <span className="text-[var(--muted-ink)]">{fmtDuration(clip.seconds)} {clip.seconds != null && '·'} {(clip.blob.size / 1024).toFixed(0)} KiB</span>
           </div>
           <audio controls src={clip.url} className="h-11 w-full" data-testid={`audio-preview-${id}`} />
-          <TestDataConsent id={`consent-${id}`} checked={consent} onChange={setConsent} />
+          <TestDataConsent id={`consent-${id}`} checked={consent} onChange={setConsent} audio />
           <div className="flex flex-wrap gap-2">
             <button type="button" className="pill pill-dark" disabled={!consent || busy} onClick={send} data-testid={`button-save-take-${id}`}><Check size={13} /> {cta}</button>
             <button type="button" className="pill pill-outline" disabled={busy} onClick={discard} data-testid={`button-discard-${id}`}><Trash2 size={13} /> Discard</button>

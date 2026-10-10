@@ -93,7 +93,7 @@ function AuthFrame({ children }: { children: ReactNode }) {
       <div className="hidden flex-col justify-between bg-[var(--mint)] p-12 md:flex">
         <Brand />
         <div>
-          <p className="eyebrow">Internal test · synthetic data only</p>
+          <p className="eyebrow">Human-reviewed hiring</p>
           <h1 className="mt-5 text-[56px]">Evidence in their <em>own voice.</em> Decisions by people.</h1>
         </div>
         <p className="text-[11px] text-[var(--muted-ink)]">No scores are configured. No transcripts are invented.</p>

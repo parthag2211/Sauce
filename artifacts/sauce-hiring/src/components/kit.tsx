@@ -60,8 +60,8 @@ export function Shell({ children }: { children: ReactNode }) {
 export function TestModeBanner() {
   return (
     <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border border-[#e6ae9c] bg-[#fdeee4] px-4 py-3 text-[12px]" data-testid="banner-test-mode">
-      <span className="chip chip-orange"><span className="dot" />Internal test mode</span>
-      <span className="text-[#6b3a2c]">Use synthetic test data only. No real candidates, no real personal details.</span>
+      <span className="chip chip-orange"><span className="dot" />Consent required</span>
+      <span className="text-[#6b3a2c]">Recordings are sent to ElevenLabs for transcription only and deleted from Sauce after 30 days. Provider standard retention applies; ask for deletion at <a className="underline" href="mailto:klvstc@gmail.com">klvstc@gmail.com</a>.</span>
     </div>
   );
 }

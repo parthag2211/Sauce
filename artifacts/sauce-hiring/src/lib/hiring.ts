@@ -118,6 +118,10 @@ export type Upload = {
   contentType: string;
   status: 'reserved' | 'ready' | 'failed';
   sha256: string;
+  expiresAt?: string | null;
+  consentVersion?: string | null;
+  providerOutputHash?: string | null;
+  sourceHash?: string | null;
   durationSeconds: number | null;
   processingState: ProcessingState;
   originalAsr: string | null;
@@ -263,10 +267,11 @@ export function useHiringUploader() {
   const upload = useCallback(
     async (
       body: Blob,
-      meta: { name: string; kind: 'audio' | 'markdown'; contentType: string },
+      meta: { name: string; kind: 'audio' | 'markdown'; contentType: string; consent: boolean },
     ) => {
       setError(null);
       try {
+        if (!meta.consent) throw new Error('Please accept the upload and transcription policy.');
         setPhase('requesting');
         const reserved = await reqRef.current({
           data: {
@@ -274,7 +279,8 @@ export function useHiringUploader() {
             size: body.size,
             contentType: meta.contentType,
             kind: meta.kind,
-            testDataConfirmed: true,
+            transcriptionConsent: meta.consent,
+            consentVersion: 'transcription-standard-30d-v1',
           },
         });
         setPhase('sending');
