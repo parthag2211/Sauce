@@ -1,5 +1,7 @@
 # Sauce backend and voice-data handoff
 
+For Danish's Replit integration, start with the [object architecture and voice worker handoff](DANISH_OBJECT_AND_VOICE_HANDOFF.md), including request/result fixtures and the distinction between evidence collection, inference and training.
+
 ## Mission
 
 Design the authoritative hiring data model and voice evidence pipeline so frontend,

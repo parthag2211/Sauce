@@ -33,6 +33,15 @@ The Sauce checkout is in `/Users/sagartiwari/Desktop/Codex/amber/amber-imessage/
 Architecture recommendations in the other files remain proposals. Resolve these choices
 before migrations or a numerical scoring implementation.
 
+## Object and voice clarification
+
+- Sagar wants two primary product objects: Applicant and HiringManager. Application/job/version/artifact records support their relationship; they are not additional personas.
+- Sagar requested applicant Markdown to be cross-referenced against hiring-side Markdown. Credential and proposal Markdown are proposed source files; exact structure and intake UX remain open.
+- Danish is using Replit. His framework, voice provider and existing API format are not specified.
+- Separate profile matching, transcript-content assessment and audio delivery assessment. Two separately versioned learned components may later support transcript and audio tasks; storing evidence does not itself train a model.
+- The requested audio “sentiment” path is not adopted as emotional inference for hiring. The supported design stores original audio and explicit observable job-related delivery/quality evidence, with no hidden-trait/emotion classifier. Delivery scores remain null without approved criteria.
+- The [Danish handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md) adds proposed durable voice-worker events and training lineage. They are fixtures/design only, not implemented routes or model training.
+
 ## Initial Sauce documentation contribution
 
 Write access is confirmed. Frontend and backend/voice handoffs plus shared contract

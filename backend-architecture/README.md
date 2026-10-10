@@ -16,8 +16,10 @@ and a recorded voice description of the ideal hire. Sauce generates at most thre
 screening questions from that brief for manager review. Every screening answer is voice
 based. Applicant intake has three sections: academic/work credentials, a proposal about
 the work they are open to, and their contact details plus references. Applicant intake
-formats are not yet specified; the voice-only requirement applies to screening answers.
-Do not silently require Markdown uploads or voice for all applicant profile sections.
+source format now includes applicant Markdown cross-referencing at Sagar's request:
+credential and proposal Markdown are proposed originals; the exact structure and intake UX
+remain open. Contacts/references stay separately structured. The voice-only requirement
+applies to screening answers, not all applicant profile sections.
 
 The manager configures weights for composite applicant profile, voice transcript content,
 and voice intonation/behaviors; see the scoring model for assessment boundaries.
@@ -27,6 +29,8 @@ Current scope is backend architecture and scoring design only. This package chan
 applicant UI, deployed backend, MCP endpoint, iOS build, or TestFlight distribution.
 
 ## Read in order
+
+Start with [the two-object explanation and Danish's Replit handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md) for the product view, voice-worker fixtures and future training tracks.
 
 1. [Data model](DATA_MODEL.md): entities, ownership, versioning, states and invariants.
 2. [Scoring model](SCORING_MODEL.md): evidence-first evaluation and configurable rubric.

@@ -12,3 +12,8 @@ weight sums or a real voice upload. Those need transactional service/database ch
 The `.example` schema ID and synthetic artifact IDs/hashes are placeholders, not live URLs.
 Empty references and omitted contact methods in examples are intentional pending decisions;
 they are not a claim that an application may be submitted without contact information.
+
+`voice-process-request.json` and `voice-process-result.json` are separate proposed worker-event
+fixtures described in [Danish's handoff](../../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
+They are not covered by `sauce.schema.json`; a production event schema remains to be agreed.
+Their hashes, transcript and measurements are synthetic, not outputs of a real audio run.

@@ -1,5 +1,7 @@
 # Proposed Sauce data model
 
+Product/API view: **Applicant** and **HiringManager** are the two main objects; jobs, applications, source artifacts and model runs are supporting records. See the [simplified object architecture and Danish handoff](../docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md). The normalized entities below implement those views rather than introducing more user personas. The latest proposed applicant source format is credential and work-proposal Markdown, with contacts/references kept separately structured.
+
 All entities and constraints below are proposals for review. IDs are opaque UUIDs;
 timestamps are UTC. PostgreSQL is a proposed starting point, reusing the team's existing
 experience, not a requirement imposed on the otherwise-empty Sauce repository.

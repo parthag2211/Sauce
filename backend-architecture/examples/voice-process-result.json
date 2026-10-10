@@ -1,0 +1,45 @@
+{
+  "schema_version": "sauce.voice.v1",
+  "event_type": "voice.process_completed.v1",
+  "request_id": "voice-run-demo-01",
+  "attempt": 1,
+  "answer_take_id": "take-demo-1",
+  "audio_artifact_id": "audio-demo-1",
+  "audio_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "completed",
+  "tasks": {
+    "transcribe": "completed",
+    "align_original_asr": "completed",
+    "recording_quality": "completed",
+    "observable_delivery": "completed"
+  },
+  "transcript": {
+    "original_transcript_artifact_id": "asr-demo-1",
+    "original_transcript_version_id": "transcript-demo-original-v1",
+    "text": "I built a weekly volunteer operation.",
+    "language": "en",
+    "segments": [{"start_ms": 0, "end_ms": 4000, "text": "I built a weekly volunteer operation."}],
+    "provider": "fixture",
+    "model_version": "fixture-asr-v1",
+    "review_state": "unreviewed"
+  },
+  "recording_quality": {
+    "state": "usable_for_demo_measurements",
+    "duration_ms": 4000,
+    "flags": [],
+    "method_version": "fixture-quality-v1"
+  },
+  "observations": [{
+    "metric": "word_rate_over_elapsed_time",
+    "value": 90,
+    "unit": "words_per_minute",
+    "start_ms": 0,
+    "end_ms": 4000,
+    "method_version": "fixture-six-words-four-seconds-v1",
+    "quality_state": "fixture_only",
+    "uncertainty": null
+  }],
+  "measurement_spec_version": "delivery-demo-v1",
+  "voice_behaviors_score": null,
+  "fixture_only": true
+}

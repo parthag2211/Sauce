@@ -14,6 +14,7 @@ as such so the teams can work toward one implementation without treating guesses
 
 ## Team starting points
 
+- **Danish / Replit integration:** [Two-object architecture, three evaluators, voice storage and training handoff](docs/DANISH_OBJECT_AND_VOICE_HANDOFF.md).
 - **Frontend team:** [Frontend handoff](docs/FRONTEND_HANDOFF.md).
 - **Backend and voice-data counterpart:** [Backend and voice handoff](docs/BACKEND_VOICE_HANDOFF.md).
 - **Both teams:** [Shared integration contract](docs/INTEGRATION_CONTRACT.md).
