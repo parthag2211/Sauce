@@ -1,53 +1,57 @@
-# Sauce vision landing page
+# Sauce landing page and live portal
 
-Live: https://sauce-vision-production.up.railway.app
+[Landing page](https://sauce-vision-production.up.railway.app) · [live portal](https://sauce-vision-production.up.railway.app/portal) · [fictional demo](https://sauce-vision-production.up.railway.app/demo)
 
-An interactive team walkthrough of the hiring manager's three inputs, the applicant's three profile inputs, up to three voice answers, the shared backend pipeline, and manager-configured scoring weights. All people, transcripts, and percentages are illustrative. The site does not collect uploads, record audio, evaluate applicants, or train models.
+The public landing page links both roles into a compact portal. Live users create an account, post jobs, save profiles, record/review voice answers and submit applications. Managers review submitted evidence and shortlist applicants. Real data starts empty. CSV/JSON historical imports are optional, with preview and confirmation. Real fit scores stay null; model training and automated matching are not implemented.
 
-## Run locally
+See [the frontend / Danish API handoff](../../docs/LIVE_API_HANDOFF.md). The original internal vision remains at `/vision`; the browser-only fictional walkthrough remains at `/demo`.
 
-Requires Node.js 22 or newer. No dependencies to install.
+## Run and verify
+
+Node.js 22.13 or newer; no dependencies to install.
 
 ```sh
-cd landing
+cd .migration-backup/landing
 npm start
+npm test
 ```
 
-Open http://localhost:3000. Set `PORT` to use another port. `GET /health` returns a health response.
+Open http://localhost:3000. Local SQLite data is created in ignored `.data/`. Set `SAUCE_DATA_DIR` to another directory. Voice capture needs a supported browser on HTTPS (localhost is supported by compatible browsers). Optional provider configuration: `GROQ_API_KEY`, or `ELEVENLABS_API_KEY` if Groq is absent. Never place provider keys in frontend code.
 
-## Preview on Replit
+## Replit workspace
 
-The Replit environment uses Node.js 22. Click **Run** to start the
-**Sauce walkthrough** workflow and open Preview. From the repository root, the
-equivalent command is:
+This source is retained under `.migration-backup/landing` for reference and is
+not the active Replit artifact. The active walkthrough is `artifacts/sauce`;
+the functional hiring app and API are `artifacts/sauce-hiring` and
+`artifacts/api-server`. To run this archived portal manually from the
+repository root:
 
 ```sh
-PORT=5000 npm --prefix landing start
+PORT=5000 npm --prefix .migration-backup/landing start
 ```
 
-The server binds to `0.0.0.0:5000`; no dependency installation or secrets are
-required. This previews the existing illustrative walkthrough, not a working
-hiring backend. The repository layout and Railway deployment are unchanged.
+The server binds to `0.0.0.0:5000`. The repository workflows remain configured
+for the active artifacts above.
 
-## Deploy to Railway
+## Railway deployment
 
-Project: `amberintelligence` (`758c0c59-8ac7-4cbd-9b29-f67075de8e72`). Environment: `production`. Service: `sauce-vision` (`046d10cf-4098-4519-85b8-ce096af8be00`). The existing `amber-website` and `amber-id` services are separate.
-
-From this directory, with Railway CLI authenticated:
+Project `amberintelligence` (`758c0c59-8ac7-4cbd-9b29-f67075de8e72`), production service `sauce-vision` (`046d10cf-4098-4519-85b8-ce096af8be00`). Persistent volume `sauce-vision-volume` (`141a67d1-b7de-44c2-af70-fd42285909cd`) mounts at `/data`. `RAILWAY_VOLUME_MOUNT_PATH` is injected by Railway. Startup prepares permissions then drops to the `node` user. Keep one replica.
 
 ```sh
-railway up . --path-as-root --service sauce-vision --environment production --project 758c0c59-8ac7-4cbd-9b29-f67075de8e72 --detach
+railway up . --path-as-root --no-gitignore --service sauce-vision --environment production --project 758c0c59-8ac7-4cbd-9b29-f67075de8e72 --detach
 ```
 
-The path flag ensures the deployment contains only this standalone landing page. Railway builds the included Dockerfile, and the server binds to its assigned `PORT` on `0.0.0.0`. No credentials or environment secrets are needed. Deployments currently use the CLI; pushing GitHub alone does not redeploy this service.
+The archive contains only this directory. `.railwayignore` excludes local data, tests and environment files while explicitly including demo assets despite parent ignore rules. GitHub pushes alone do not redeploy. `/health` reports server health; `/api/v1/session` identifies live API availability without exposing records. The deployed Groq credential is configured privately through Railway, not committed.
 
-## Edit the vision
+Default public origin is `https://sauce-vision-production.up.railway.app`. Set `SAUCE_PUBLIC_ORIGIN` when changing domains; write requests require an exact Origin match.
 
-- `public/index.html`: narrative, diagrams, screening examples, team handoff links.
-- `public/app.js`: journey content, backend stage content, accessible interactions, and illustrative weight validation.
-- `public/style.css`: visual design and responsive layouts.
-- `server.mjs`: dependency-free static server and health endpoint.
+## Code boundaries
 
-Keep this explanation aligned with `../docs/INTEGRATION_CONTRACT.md`. Manager context sources are not the weighted scoring components. The scoring inputs are the composite applicant profile, applicant transcript content, and permitted observable voice behavior evidence.
-
-Manual checks: desktop and 390px mobile layouts; both role tabs; screening answer accordion; backend stage tabs; weights totaling more than 100%; reset to the illustrative 50/35/15 mix; no browser console errors. Keyboard navigation and reduced-motion styles are supported.
+- `public/home.html`, `home.css`: public landing and role links.
+- `public/portal.html`, `public/demo/portal.mjs`: authenticated two-role UI.
+- `public/demo/portal-voice.mjs`: memory-only capture and authenticated upload.
+- `backend/`: private account, four-object domain, SQLite storage, voice and import logic.
+- `server.mjs`: static serving, health and HTTP routing.
+- `public/demo/app.mjs`: separate browser-only fictional demo.
+- `demo-router.mjs`: separate stateless mock namespace; never use it for real records.
+- `test/`: domain/access/persistence/import/transcription tests.

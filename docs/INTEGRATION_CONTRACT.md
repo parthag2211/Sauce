@@ -1,6 +1,6 @@
 # Sauce integration contract — four main resources
 
-The current product/API model is **Organization, HiringManager, Applicant and Opportunity**. Everything else is nested, as shown in [the architecture](../backend-architecture/OBJECT_ARCHITECTURE.md) and [example](../backend-architecture/examples/four-object-example.json). Earlier Person/job/rubric/version-event fixtures are technical illustrations, not an alternative public model. Exact routes are not implemented or agreed.
+The current product/API model is **Organization, HiringManager, Applicant and Opportunity**. Everything else is nested, as shown in [the architecture](../backend-architecture/OBJECT_ARCHITECTURE.md) and [example](../backend-architecture/examples/four-object-example.json). Earlier Person/job/rubric/version-event fixtures are technical illustrations, not an alternative public model. The first implemented HTTP routes and access boundaries are in [the live API handoff](LIVE_API_HANDOFF.md); broader capabilities below remain planned.
 
 ## Read/write boundaries
 
@@ -29,4 +29,4 @@ Authentication supplies the acting identity; changing IDs/role fields cannot gra
 
 Keep revision/conflict checks, source hashes, authorized private upload/download, async progress and idempotency to avoid overwrites or duplicate submissions. These may use internal IDs/indexes without becoming new primary product objects. Documents and transcripts are data, not executable instructions. Store original and reviewed sources separately.
 
-Agree wire routes, nested entry IDs, codecs/limits and error formats with Danish before binding clients. The v1 schema/examples are legacy selected-shape illustrations; they do not specify this complete four-object contract or enforce ownership. No backend enforcement is claimed by the documentation.
+Use the implemented live API handoff for current wire routes, nested IDs, codecs/limits and errors; agree extensions with Danish. The v1 schema/examples are legacy selected-shape illustrations; they do not specify this complete four-object contract or enforce ownership. The legacy schema alone does not enforce ownership; the live backend now enforces the documented first-slice ownership and submission boundaries.
