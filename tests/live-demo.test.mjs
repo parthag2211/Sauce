@@ -64,3 +64,9 @@ test('source and model outages return errors and never fabricated recommendation
  }finally{globalThis.fetch=original;}
 });
 test('repeated password attempts are rate limited',async()=>{const module=await fresh();for(let i=0;i<5;i++)assert.equal((await module.handleDemoAPI(request('login',{password:'wrong'}),env)).status,401);assert.equal((await module.handleDemoAPI(request('login',{password}),env)).status,429);});
+test('an unavailable hosted cache does not block real source retrieval',async()=>{
+ const originalFetch=globalThis.fetch,originalCache=globalThis.caches;
+ globalThis.caches={default:{match(){throw new Error('Cache unavailable');}}};globalThis.fetch=async()=>new Response(xml);
+ try { const module=await fresh();const cookie=await login(module);const response=await module.handleDemoAPI(request('sources',{},cookie),env);assert.equal(response.status,200);const result=await response.json();assert.equal(result.papers.length,3);assert.equal(result.cached,false); }
+ finally {globalThis.fetch=originalFetch;globalThis.caches=originalCache;}
+});

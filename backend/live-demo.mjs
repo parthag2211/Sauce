@@ -42,12 +42,14 @@ async function body(request){
 async function cached(key,ttl,fn){
   const current=localCache.get(key);if(current&&current.until>Date.now())return {...current.value,cached:true};
   const url=new Request('https://sauce-cache.invalid/'+key);
-  const edge=globalThis.caches?.default;
-  if(edge){const hit=await edge.match(url);if(hit){const value=await hit.json();localCache.set(key,{until:Date.now()+ttl,value});return {...value,cached:true};}}
+  let edge;
+  // Some hosted dispatch environments omit or reject the Cache API. A cache
+  // outage must not prevent retrieval or a real model evaluation.
+  try { edge=globalThis.caches?.default; if(edge){const hit=await edge.match(url);if(hit){const value=await hit.json();localCache.set(key,{until:Date.now()+ttl,value});return {...value,cached:true};}} } catch { edge=null; }
   if(inFlight.has(key))return {...await inFlight.get(key),cached:true};
   const pending=(async()=>{
     const value=await fn();localCache.set(key,{until:Date.now()+ttl,value});
-    if(edge)await edge.put(url,new Response(JSON.stringify(value),{headers:{'Content-Type':'application/json','Cache-Control':`public, max-age=${Math.floor(ttl/1000)}`}}));
+    if(edge)try { await edge.put(url,new Response(JSON.stringify(value),{headers:{'Content-Type':'application/json','Cache-Control':`public, max-age=${Math.floor(ttl/1000)}`}})); } catch { /* Keep the successful live result and local cache. */ }
     return {...value,cached:false};
   })();
   inFlight.set(key,pending);try{return await pending;}finally{inFlight.delete(key);}
@@ -63,7 +65,9 @@ export function parseArxiv(xml){
   }).filter(Boolean);
 }
 async function remote(url){
-  const result=await fetch(url,{headers:{'User-Agent':'Sauce-Hackathon-Demo/1.0 (bounded public research lookup)','Accept':'application/atom+xml, application/json'},signal:AbortSignal.timeout(18000),redirect:'error'});
+  let result;
+  try { result=await fetch(url,{headers:{'User-Agent':'Sauce-Hackathon-Demo/1.0 (bounded public research lookup)','Accept':'application/atom+xml, application/json'},signal:AbortSignal.timeout(18000),redirect:'manual'}); }
+  catch(error) { console.error('Sauce public source retrieval failed',error.name,clean(error.message).slice(0,200));throw new DemoError('The public source request failed. Try again later.'); }
   if(!result.ok)throw new DemoError(`The research source is unavailable (HTTP ${result.status}). Try again later.`);
   const text=await result.text();if(text.length>200000)throw new DemoError('The research response was too large.');return text;
 }
@@ -102,7 +106,7 @@ export async function evaluateCriterion(criterion,env){
     ]}));
     const start=Date.now();
     let response;
-    try{response=await fetch('https://api.openai.com/v1/decisions',{method:'POST',headers:{'Authorization':'Bearer '+env.OPENAI_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-6-luna',input,questions}),signal:AbortSignal.timeout(25000)});}catch{throw new DemoError('The live Decisions API timed out. No recommendation was fabricated. Try again later.');}
+    try{response=await fetch('https://api.openai.com/v1/decisions',{method:'POST',headers:{'Authorization':'Bearer '+env.OPENAI_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-6-luna',input,questions}),signal:AbortSignal.timeout(25000),redirect:'manual'});}catch{throw new DemoError('The live Decisions API timed out. No recommendation was fabricated. Try again later.');}
     if(!response.ok){
       if(response.status===401||response.status===403)throw new DemoError('The demo API key needs renewal or access to the Decisions API.');
       if(response.status===429)throw new DemoError('OpenAI quota or rate limits were reached. Try again later.');
@@ -156,5 +160,11 @@ export async function handleDemoAPI(request,env){
       return json(await evaluateCriterion(criterion,env));
     }
     return json({error:'Not found'},404);
-  }catch(error){return json({error:error instanceof DemoError?error.message:'The live demo could not complete this request. Please try again.'},error instanceof DemoError?error.status:503);}
+  }catch(error){
+    if(!(error instanceof DemoError)){
+      let message=clean(error.message);for(const key of ['OPENAI_API_KEY','DEMO_SESSION_SECRET','DEMO_PASSWORD_HASH'])if(env[key])message=message.replaceAll(env[key],'[redacted]');
+      console.error('Sauce live demo failure',error.name,message.replace(/sk-[A-Za-z0-9_-]+/g,'[redacted]').slice(0,200));
+    }
+    return json({error:error instanceof DemoError?error.message:'The live demo could not complete this request. Please try again.'},error instanceof DemoError?error.status:503);
+  }
 }
