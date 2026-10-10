@@ -1,6 +1,8 @@
 # Sauce
 
-[**Open the working demo**](https://sauce-hiring-demo.parthag22.chatgpt.site)
+[**Open the working demo**](https://parthag2211.github.io/Sauce/)
+
+[Sites version](https://sauce-hiring-demo.parthag22.chatgpt.site)
 
 Sauce turns a hiring team's context and candidate evidence into a small interview shortlist. This repository's `main` branch contains the same application as the hosted demo.
 
