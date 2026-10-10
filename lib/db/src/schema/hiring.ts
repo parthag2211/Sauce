@@ -33,3 +33,13 @@ export const hiringJobs = pgTable("hiring_jobs", {
   leaseToken: text("lease_token"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+export const hiringDeletionRequests = pgTable("hiring_deletion_requests", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id").notNull(),
+  uploadId: text("upload_id").notNull(),
+  state: text("state").notNull().default("requested"),
+  attempts: integer("attempts").notNull().default(0),
+  errorCode: text("error_code"),
+  requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -6,6 +6,7 @@ import { DomainError, insist, visibleRecord } from "../lib/hiring-model";
 import { executeCommand } from "../lib/hiring-service";
 import { reserveUpload, finalizeUpload, authorizedFile } from "../lib/hiring-files";
 import { redactExpiredEvidence } from "../lib/hiring-privacy";
+import { requestRecordingDeletion } from "../lib/hiring-retention";
 
 const router = Router();
 router.use((req, res, next) => {
@@ -24,7 +25,11 @@ router.get("/workspace", async (req, res) => {
   const records = (await pool.query("SELECT * FROM hiring_records WHERE owner_id=$1 OR (kind='Opportunity' AND data->>'status'='published') ORDER BY created_at DESC LIMIT 500", [actor])).rows;
   const uploads = (await pool.query("SELECT id,revision,data FROM hiring_uploads WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 300", [actor])).rows;
   const ofKind = (kind: string) => records.filter(r => r.kind === kind && r.owner_id === actor).map(r => visibleRecord(r, actor));
-  res.json({ userId: actor, mode: "live_transcription", organizations: ofKind("Organization"), hiringManagers: ofKind("HiringManager"), applicant: ofKind("Applicant")[0] || null, opportunities: records.filter(r => r.kind === "Opportunity").map(r => visibleRecord(r, actor)), uploads: redactExpiredEvidence(uploads) });
+  const deletionRequests = (await pool.query("SELECT id,upload_id AS \"uploadId\",state,error_code AS \"errorCode\" FROM hiring_deletion_requests WHERE owner_id=$1 ORDER BY requested_at DESC LIMIT 100", [actor])).rows.map((r: any) => ({
+    ...r, sauceDeleted: r.state === "completed",
+    providerRetentionNote: "ElevenLabs provider-side retention is separate.",
+  }));
+  res.json({ userId: actor, mode: "live_transcription", organizations: ofKind("Organization"), hiringManagers: ofKind("HiringManager"), applicant: ofKind("Applicant")[0] || null, opportunities: records.filter(r => r.kind === "Opportunity").map(r => visibleRecord(r, actor)), uploads: redactExpiredEvidence(uploads), deletionRequests });
 });
 router.get("/opportunities/:id", async (req, res) => {
   const row = (await pool.query("SELECT * FROM hiring_records WHERE id=$1 AND kind='Opportunity'", [req.params.id])).rows[0];
@@ -50,6 +55,20 @@ router.get("/uploads/:id", async (req, res) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Content-Disposition", row.data.kind === "audio" ? "inline" : "attachment");
   file.createReadStream().on("error", () => res.destroy()).pipe(res);
+});
+router.get("/deletion-requests", async (req, res) => {
+  const actor = getAuth(req).userId!;
+  const requests = (await pool.query("SELECT id,upload_id AS \"uploadId\",state,error_code AS \"errorCode\" FROM hiring_deletion_requests WHERE owner_id=$1 ORDER BY requested_at DESC LIMIT 100", [actor])).rows.map((r: any) => ({
+    ...r, sauceDeleted: r.state === "completed",
+    providerRetentionNote: "ElevenLabs provider-side retention is separate.",
+  }));
+  res.json({ requests });
+});
+router.post("/deletion-requests", async (req, res) => {
+  const uploadId = typeof req.body?.uploadId === "string" ? req.body.uploadId : "";
+  insist(uploadId.length > 0 && uploadId.length <= 150, "invalid_deletion_request");
+  const result = await requestRecordingDeletion(getAuth(req).userId!, uploadId);
+  res.status(result.state === "requested" ? 201 : 200).json(result);
 });
 router.use((err: any, req: any, res: any, _next: any) => {
   if (!(err instanceof DomainError)) req.log.error({ errorName: err?.name }, "Hiring request failed");

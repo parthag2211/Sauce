@@ -16,3 +16,7 @@ export * from './hiringUpload';
 export * from './hiringUploadInput';
 export * from './hiringUploadInputKind';
 export * from './hiringWorkspace';
+export * from './recordingDeletionInput';
+export * from './recordingDeletionRequest';
+export * from './recordingDeletionRequests';
+export * from './recordingDeletionRequestState';

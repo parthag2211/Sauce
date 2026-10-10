@@ -81,6 +81,33 @@ paths:
           content:
             application/octet-stream:
               schema: { type: string, format: binary }
+  /hiring/deletion-requests:
+    get:
+      operationId: getRecordingDeletionRequests
+      responses:
+        "200":
+          description: Deletion requests belonging to the signed-in user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecordingDeletionRequests" }
+    post:
+      operationId: requestRecordingDeletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecordingDeletionInput" }
+      responses:
+        "200":
+          description: Existing request or already deleted recording
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecordingDeletionRequest" }
+        "201":
+          description: Request accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecordingDeletionRequest" }
   /healthz:
     get:
       operationId: healthCheck
@@ -125,6 +152,9 @@ components:
         uploads:
           type: array
           items: { $ref: "#/components/schemas/HiringRecord" }
+        deletionRequests:
+          type: array
+          items: { $ref: "#/components/schemas/RecordingDeletionRequest" }
     HiringCommand:
       type: object
       required: [action, idempotencyKey, payload]
@@ -153,6 +183,28 @@ components:
       properties:
         id: { type: string }
         uploadUrl: { type: string }
+    RecordingDeletionInput:
+      type: object
+      required: [uploadId]
+      properties:
+        uploadId: { type: string, minLength: 1, maxLength: 150 }
+    RecordingDeletionRequest:
+      type: object
+      required: [id, uploadId, state, sauceDeleted, providerRetentionNote]
+      properties:
+        id: { type: string }
+        uploadId: { type: string }
+        state: { type: string, enum: [requested, processing, retrying, completed] }
+        sauceDeleted: { type: boolean }
+        providerRetentionNote: { type: string }
+        errorCode: { type: string }
+    RecordingDeletionRequests:
+      type: object
+      required: [requests]
+      properties:
+        requests:
+          type: array
+          items: { $ref: "#/components/schemas/RecordingDeletionRequest" }
     HealthStatus:
       type: object
       properties:

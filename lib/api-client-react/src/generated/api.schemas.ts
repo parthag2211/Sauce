@@ -87,6 +87,37 @@ export interface HiringUpload {
   uploadUrl: string;
 }
 
+export interface RecordingDeletionInput {
+  /**
+     * @minLength 1
+     * @maxLength 150
+     */
+  uploadId: string;
+}
+
+export type RecordingDeletionRequestState = typeof RecordingDeletionRequestState[keyof typeof RecordingDeletionRequestState];
+
+
+export const RecordingDeletionRequestState = {
+  requested: 'requested',
+  processing: 'processing',
+  retrying: 'retrying',
+  completed: 'completed',
+} as const;
+
+export interface RecordingDeletionRequest {
+  id: string;
+  uploadId: string;
+  state: RecordingDeletionRequestState;
+  sauceDeleted: boolean;
+  providerRetentionNote: string;
+  errorCode?: string;
+}
+
+export interface RecordingDeletionRequests {
+  requests: RecordingDeletionRequest[];
+}
+
 export interface HealthStatus {
   status: string;
 }

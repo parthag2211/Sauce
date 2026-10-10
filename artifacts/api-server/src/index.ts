@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { startVoiceWorker } from "./lib/hiring-worker";
+import { retryPendingDeletionRequests } from "./lib/hiring-retention";
 
 const rawPort = process.env["PORT"];
 
@@ -24,4 +25,8 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startVoiceWorker();
+  const deletionTimer = setInterval(() => {
+    retryPendingDeletionRequests().catch(() => logger.error("Deletion request worker failed; requests remain durable"));
+  }, 60_000);
+  deletionTimer.unref();
 });

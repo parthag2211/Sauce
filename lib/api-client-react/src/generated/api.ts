@@ -25,7 +25,10 @@ import type {
   HiringRecord,
   HiringUpload,
   HiringUploadInput,
-  HiringWorkspace
+  HiringWorkspace,
+  RecordingDeletionInput,
+  RecordingDeletionRequest,
+  RecordingDeletionRequests
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -499,6 +502,159 @@ export function useGetHiringUpload<TData = Awaited<ReturnType<typeof getHiringUp
 
 
 
+
+export const getGetRecordingDeletionRequestsUrl = () => {
+
+
+
+
+  return `/api/hiring/deletion-requests`
+}
+
+export const getRecordingDeletionRequests = async ( options?: Parameters<typeof customFetch>[1]): Promise<RecordingDeletionRequests> => {
+
+  return customFetch<RecordingDeletionRequests>(getGetRecordingDeletionRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRecordingDeletionRequestsQueryKey = () => {
+    return [
+    `/api/hiring/deletion-requests`
+    ] as const;
+    }
+
+
+export const getGetRecordingDeletionRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getRecordingDeletionRequests>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecordingDeletionRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecordingDeletionRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecordingDeletionRequests>>> = ({ signal }) => getRecordingDeletionRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecordingDeletionRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRecordingDeletionRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getRecordingDeletionRequests>>>
+export type GetRecordingDeletionRequestsQueryError = ErrorType<unknown>
+
+
+
+export function useGetRecordingDeletionRequests<TData = Awaited<ReturnType<typeof getRecordingDeletionRequests>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecordingDeletionRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRecordingDeletionRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRequestRecordingDeletionUrl = () => {
+
+
+
+
+  return `/api/hiring/deletion-requests`
+}
+
+export const requestRecordingDeletion = async (recordingDeletionInput: RecordingDeletionInput, options?: Parameters<typeof customFetch>[1]): Promise<RecordingDeletionRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RecordingDeletionRequest>(getRequestRecordingDeletionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(recordingDeletionInput)
+  }
+);}
+
+
+
+
+
+export const getRequestRecordingDeletionMutationKey = () => ['requestRecordingDeletion'] as const;
+
+export const getRequestRecordingDeletionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestRecordingDeletion>>, TError,RequestRecordingDeletionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestRecordingDeletion>>, TError,RequestRecordingDeletionMutationVariables, TContext> => {
+
+const mutationKey = getRequestRecordingDeletionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestRecordingDeletion>>, RequestRecordingDeletionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestRecordingDeletion(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestRecordingDeletionMutationResult = NonNullable<Awaited<ReturnType<typeof requestRecordingDeletion>>>
+    export type RequestRecordingDeletionMutationBody = BodyType<RecordingDeletionInput>
+    export type RequestRecordingDeletionMutationError = ErrorType<unknown>
+    export type RequestRecordingDeletionMutationVariables = {data: BodyType<RecordingDeletionInput>}
+
+    export const useRequestRecordingDeletion = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestRecordingDeletion>>, TError,RequestRecordingDeletionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestRecordingDeletion>>,
+        TError,
+        RequestRecordingDeletionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestRecordingDeletionMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 

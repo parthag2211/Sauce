@@ -111,6 +111,36 @@ export const GetHiringUploadParams = zod.object({
 export const GetHiringUploadResponse = zod.unknown()
 
 
+export const GetRecordingDeletionRequestsResponse = zod.object({
+  "requests": zod.array(zod.object({
+  "id": zod.string(),
+  "uploadId": zod.string(),
+  "state": zod.enum(['requested', 'processing', 'retrying', 'completed']),
+  "sauceDeleted": zod.boolean(),
+  "providerRetentionNote": zod.string(),
+  "errorCode": zod.string().optional()
+}))
+})
+
+
+export const requestRecordingDeletionBodyUploadIdMax = 150;
+
+
+
+export const RequestRecordingDeletionBody = zod.object({
+  "uploadId": zod.string().min(1).max(requestRecordingDeletionBodyUploadIdMax)
+})
+
+export const RequestRecordingDeletionResponse = zod.object({
+  "id": zod.string(),
+  "uploadId": zod.string(),
+  "state": zod.enum(['requested', 'processing', 'retrying', 'completed']),
+  "sauceDeleted": zod.boolean(),
+  "providerRetentionNote": zod.string(),
+  "errorCode": zod.string().optional()
+})
+
+
 /**
  * Returns server health status
  * @summary Health check
